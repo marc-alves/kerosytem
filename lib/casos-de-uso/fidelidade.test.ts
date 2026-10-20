@@ -1,6 +1,6 @@
-import { salvarPrograma } from "@/lib/casos-de-uso/fidelidade";
+import { desfazerResgate, gerarNovoLink, registrarResgate, salvarPrograma } from "@/lib/casos-de-uso/fidelidade";
 import { cancelarVenda, confirmarRecebimento, lancarVenda, type FidelidadeNaVenda } from "@/lib/casos-de-uso/vendas";
-import { criarRepositorioEmMemoria, criarRepositorioFidelidadeEmMemoria } from "@/lib/dados/memoria";
+import { criarRepositorioEmMemoria, criarRepositorioFidelidadeEmMemoria, lerCartaoPublico } from "@/lib/dados/memoria";
 import { criarSemente, EMPRESA_A, EMPRESA_B } from "@/lib/dados/semente";
 import type { Banco, RepositorioFidelidade, RepositorioIndicacao } from "@/lib/dados/tipos";
 
@@ -132,5 +132,49 @@ describe("cancelamento com fidelidade (RF5, spec 10.3)", () => {
 
   it("venda da Carla fora do resgate pode ser cancelada", async () => {
     expect(await cancelarVenda(vendasA, "a-ven-carla-12", agora, a)).toEqual({ ok: true });
+  });
+});
+
+describe("resgate (RF6, RF7, spec 10.2)", () => {
+  it("Ana, completa e liberada: resgata e volta a 0", async () => {
+    expect(await registrarResgate(a, "a-cli-ana", agora)).toEqual({ ok: true, premio: "1 salgado grátis" });
+    const cartao = (await a.cartaoCliente("a-cli-ana"))!;
+    expect(cartao.carimbos.filter((c) => c.resgateId === null)).toHaveLength(0);
+    expect(cartao.resgates).toHaveLength(1);
+  });
+
+  it("Bia, completa a liberar: recusado, nada registrado", async () => {
+    expect(await registrarResgate(a, "a-cli-bia", agora)).toEqual({
+      ok: false,
+      erros: { geral: "O cartão de Bia não tem mais carimbos liberados suficientes. Nada foi registrado." },
+    });
+    expect((await a.cartaoCliente("a-cli-bia"))!.resgates).toHaveLength(0);
+  });
+
+  it("desfazer devolve os carimbos; desfazer de novo é recusado", async () => {
+    expect(await desfazerResgate(a, { clienteId: "a-cli-carla", resgateId: "a-res-carla-1" }, agora)).toEqual({ ok: true });
+    const cartao = (await a.cartaoCliente("a-cli-carla"))!;
+    expect(cartao.carimbos.every((c) => c.resgateId === null)).toBe(true);
+    expect(await desfazerResgate(a, { clienteId: "a-cli-carla", resgateId: "a-res-carla-1" }, agora)).toEqual({
+      ok: false,
+      erros: { geral: "Este resgate já foi desfeito." },
+    });
+  });
+
+  it("outra empresa não registra nem desfaz", async () => {
+    expect((await registrarResgate(b, "a-cli-ana", agora)).ok).toBe(false);
+    expect((await desfazerResgate(b, { clienteId: "a-cli-carla", resgateId: "a-res-carla-1" }, agora)).ok).toBe(false);
+  });
+});
+
+describe("gerarNovoLink (RF8)", () => {
+  it("troca a chave: a antiga para de funcionar", async () => {
+    expect(await gerarNovoLink(a, "a-cli-joao", agora, () => "chave-trocada")).toEqual({ ok: true });
+    expect(lerCartaoPublico(banco, "teste-joao")).toBeNull();
+    expect(lerCartaoPublico(banco, "chave-trocada")?.clienteNome).toBe("João");
+  });
+
+  it("cliente sem cartão ou de outra empresa", async () => {
+    expect(await gerarNovoLink(b, "a-cli-joao", agora, () => "x")).toEqual({ ok: false, erros: { geral: "Cartão não encontrado." } });
   });
 });
