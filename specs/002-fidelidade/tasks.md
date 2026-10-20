@@ -35,7 +35,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F21. Cartão do cliente (**spec 10.2**) em `/fidelidade/clientes/[id]`: cartão, a liberar com a próxima data, sobra, histórico (liberado / libera em, carimbo retirado, resgate desfeito) (depende de F16, F18)
 - [x] F22. **Registrar resgate** (ou o aviso "Prêmio liberado a partir de…") e **Desfazer resgate** no cartão do cliente, com os diálogos e a recusa da spec 10.2; sem toque duplo (depende de F15, F21)
 - [x] F23. **Copiar mensagem** (vira "✓ Copiado") e **Gerar novo link** com diálogo, no cartão do cliente (depende de F15, F17, F21)
-- [ ] F24. Ajustes nas telas de venda (**spec 10.3**): frase de carimbo e **Copiar mensagem do cartão** depois de confirmar recebimento; aviso de carimbo no diálogo de cancelar; recusa de cancelar venda já usada em resgate com o link **Abrir cartão de João** (depende de F13, F14, F16, F21)
+- [x] F24. Ajustes nas telas de venda (**spec 10.3**): frase de carimbo e **Copiar mensagem do cartão** depois de confirmar recebimento; aviso de carimbo no diálogo de cancelar; recusa de cancelar venda já usada em resgate com o link **Abrir cartão de João** (depende de F13, F14, F16, F21)
 
 ## Fase 5 — Tela do cliente
 - [ ] F25. Página **Meu cartão** em `/cartao/[chave]` (**spec 11.1**), fora do grupo `(app)`: sem login, cabeçalho nem navegação; `/cartao/` liberado no `proxy.ts`; não indexada; sem cache; completo liberado e a liberar; link inválido, trocado ou de módulo desligado com a mesma mensagem; nada de telefone, valor, código ou indicador (RF9); checklist (depende de F16, F18)

@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import * as vendas from "@/lib/casos-de-uso/vendas";
-import { empresaDaSessao, repositorio } from "@/lib/dados/sessao";
+import { empresaDaSessao, fidelidadeNaVenda, repositorio, repositorioFidelidade } from "@/lib/dados/sessao";
 import { moduloAtivo } from "@/lib/empresas/modulos";
 
 // Server Actions recebem qualquer coisa por POST: só passa adiante texto.
@@ -36,13 +36,15 @@ export async function acaoLancarVenda(entrada: Record<string, unknown>) {
 }
 
 export async function acaoConfirmarRecebimento(vendaId: string) {
-  const resultado = await vendas.confirmarRecebimento(await repositorio(), texto(vendaId), new Date());
+  // Com a fidelidade ativa, a confirmação dá o carimbo (spec 002, RF3).
+  const resultado = await vendas.confirmarRecebimento(await repositorio(), texto(vendaId), new Date(), await fidelidadeNaVenda());
   if (resultado.ok) refresh();
   return resultado;
 }
 
 export async function acaoCancelarVenda(vendaId: string) {
-  const resultado = await vendas.cancelarVenda(await repositorio(), texto(vendaId), new Date());
+  // A trava da venda usada em resgate vale mesmo com a fidelidade desligada (spec 002, RF5).
+  const resultado = await vendas.cancelarVenda(await repositorio(), texto(vendaId), new Date(), await repositorioFidelidade());
   if (resultado.ok) refresh();
   return resultado;
 }
