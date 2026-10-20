@@ -81,3 +81,14 @@ export type ResultadoCodigo =
       | "cliente_de_outro_indicador"
       | "primeira_compra_ja_feita"
     >;
+
+export type StatusPagamento = "ativo" | "cancelado";
+
+export type Saldo = {
+  /** Comissões de vendas confirmadas menos pagamentos ativos (RN11). */
+  saldo: Centavos;
+  /** Comissões de vendas pendentes; não entram no saldo. */
+  aConfirmar: Centavos;
+};
+
+export type ResultadoPagamento = { ok: true } | Falha<"valor_invalido" | "acima_do_saldo">;
