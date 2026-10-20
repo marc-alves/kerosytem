@@ -15,7 +15,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F7. `ordenarCartoes` (spec 10.1) e `historicoPublico` (spec 11.1: sem retirados, sem desfeitos, sem valores) (depende de F4)
 
 ## Fase 2 — Módulos independentes (base, spec 000 RE5 e RE7)
-- [ ] F8. Todos os módulos ativos na semente e `moduloAtivo(empresa, modulo)` num só lugar; navegação montada pelos módulos ativos (Nova venda e Vendas com qualquer módulo, Indicadores com `indicacao`, Fidelidade com `fidelidade`), com testes das combinações e frase "Nenhum módulo ativo. Fale com o Kero System." sem módulos (depende de E9, ou faz a parte de módulos dela sobre a sessão mockada)
+- [x] F8. Todos os módulos ativos na semente e `moduloAtivo(empresa, modulo)` num só lugar; navegação montada pelos módulos ativos (Nova venda e Vendas com qualquer módulo, Indicadores com `indicacao`, Fidelidade com `fidelidade`), com testes das combinações e frase "Nenhum módulo ativo. Fale com o Kero System." sem módulos (depende de E9, ou faz a parte de módulos dela sobre a sessão mockada)
 - [ ] F9. Telas de venda sem Indicação: Nova venda sem o campo Código (e `previaVenda`/`lancarVenda` recusam código), Lista de vendas sem o filtro Indicador, cartões sem código; rotas `/indicadores/*` vão para `/` (depende de F8)
 
 ## Fase 3 — Casos de uso sobre o banco em memória

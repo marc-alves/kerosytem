@@ -1,21 +1,25 @@
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { criarRepositorioEmMemoria } from "@/lib/dados/memoria";
-import { criarSemente, EMPRESA_A } from "@/lib/dados/semente";
-import type { Banco, Empresa, RepositorioIndicacao } from "@/lib/dados/tipos";
+import { criarSemente, EMPRESA_A, VERSAO_SEMENTE } from "@/lib/dados/semente";
+import type { Banco, Empresa, Modulo, RepositorioIndicacao } from "@/lib/dados/tipos";
+import { moduloAtivo } from "@/lib/empresas/modulos";
 
 // Provisório (até a T43): sem login, a sessão é sempre da primeira empresa da semente.
 // O banco fica no `globalThis` para sobreviver ao recarregamento do `npm run dev`;
 // reiniciar o servidor volta à semente.
-const global = globalThis as typeof globalThis & { __bancoKero?: Banco };
+// `VERSAO_SEMENTE` muda quando a semente ou o formato das linhas muda: o banco antigo é trocado.
+const global = globalThis as typeof globalThis & { __bancoKero?: Banco; __bancoKeroVersao?: number };
 
 function banco(): Banco {
-  global.__bancoKero ??= criarSemente(new Date());
-  return global.__bancoKero;
+  if (!global.__bancoKero || global.__bancoKeroVersao !== VERSAO_SEMENTE) reiniciarBancoMock();
+  return global.__bancoKero!;
 }
 
 /** Volta os dados à semente (só para a página /teste). */
 export function reiniciarBancoMock() {
   global.__bancoKero = criarSemente(new Date());
+  global.__bancoKeroVersao = VERSAO_SEMENTE;
 }
 
 /** Empresa da sessão (nome no cabeçalho, módulos ativos). */
@@ -23,6 +27,13 @@ export async function empresaDaSessao(): Promise<Empresa> {
   // Os dados mudam a cada requisição: nada disso entra no pré-render.
   await connection();
   return banco().empresas.find((e) => e.id === EMPRESA_A)!;
+}
+
+/** Rotas de um módulo desligado na empresa levam à tela inicial (spec 000, RE5). */
+export async function exigirModulo(modulo: Modulo): Promise<Empresa> {
+  const empresa = await empresaDaSessao();
+  if (!moduloAtivo(empresa, modulo)) redirect("/");
+  return empresa;
 }
 
 /** Dados do módulo de Indicação, presos à empresa da sessão (RE3). */

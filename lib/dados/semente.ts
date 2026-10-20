@@ -3,6 +3,9 @@ import { calcularVenda } from "@/lib/indicacao/venda";
 import type { Centavos, PontosBase, StatusVenda } from "@/lib/indicacao/tipos";
 
 // Dados fictícios de desenvolvimento (T13). Telefones inventados, no formato (61) 90000-00NN.
+/** Mude ao mudar a semente ou o formato das linhas (lib/dados/sessao.ts troca o banco em memória). */
+export const VERSAO_SEMENTE = 2;
+
 export const EMPRESA_A = "empresa-lanchonete-da-maria";
 export const EMPRESA_B = "empresa-pastelaria-do-ze";
 
@@ -42,8 +45,8 @@ export function criarSemente(agora: Date): Banco {
 
   return {
     empresas: [
-      { id: EMPRESA_A, nome: "Lanchonete da Maria", modulosAtivos: ["indicacao"], criadoEm: antes(60 * DIA) },
-      { id: EMPRESA_B, nome: "Pastelaria do Zé", modulosAtivos: ["indicacao"], criadoEm: antes(30 * DIA) },
+      { id: EMPRESA_A, nome: "Lanchonete da Maria", modulosAtivos: ["indicacao", "fidelidade"], criadoEm: antes(60 * DIA) },
+      { id: EMPRESA_B, nome: "Pastelaria do Zé", modulosAtivos: ["indicacao", "fidelidade"], criadoEm: antes(30 * DIA) },
     ],
     indicadores: [
       { id: "a-ind-camila", empresaId: EMPRESA_A, nome: "Camila", telefone: "5561900000001", criadoEm: antes(50 * DIA) },
