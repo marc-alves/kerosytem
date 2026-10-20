@@ -30,3 +30,35 @@ export type CalculoVenda = {
   comissaoBp: PontosBase;
   comissao: Centavos;
 };
+
+/** Data no formato do Postgres `date` (`AAAA-MM-DD`). */
+export type Data = string;
+
+export type TipoCodigo = "normal" | "primeira_compra";
+
+export type StatusVenda = "pendente" | "confirmada" | "cancelada";
+
+/** Código já carregado do banco, com os usos contados (só vendas confirmadas, RN3). */
+export type CodigoParaValidar = {
+  codigo: string;
+  indicadorId: string;
+  indicadorNome: string;
+  tipo: TipoCodigo;
+  descontoBp: PontosBase;
+  comissaoBp: PontosBase;
+  /** Último dia em que vale, até 23h59 de Brasília; `null` = sem validade (RN2). */
+  validoAte: Data | null;
+  ativo: boolean;
+  limiteUsos: number;
+  usos: number;
+};
+
+/** Avisos não recusam a venda; aparecem na tela (RN3, RN5). */
+export type AvisoCodigo = {
+  tipo: "limite_atingido";
+  mensagem: string;
+};
+
+export type ResultadoCodigo =
+  | { ok: true; codigo: CodigoParaValidar; avisos: AvisoCodigo[] }
+  | Falha<"codigo_nao_encontrado" | "codigo_desativado" | "codigo_vencido">;
