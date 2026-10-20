@@ -1,4 +1,9 @@
-import { estadoCartao } from "@/lib/fidelidade/cartao";
+import {
+  escolherCarimbosDoResgate,
+  estadoCartao,
+  podeCancelarPorFidelidade,
+  podeDesfazerResgate,
+} from "@/lib/fidelidade/cartao";
 import type { CarimboParaCartao } from "@/lib/fidelidade/tipos";
 
 const DIA = 24 * 60 * 60 * 1000;
@@ -70,5 +75,53 @@ describe("estadoCartao (RF4 a RF6, seção 12)", () => {
   it("carimbo que libera exatamente agora já conta como liberado", () => {
     const [c] = carimbos(1);
     expect(estadoCartao({ carimbos: [{ ...c, liberadoEm: agora }], meta: 2, agora }).liberados).toBe(1);
+  });
+});
+
+describe("escolherCarimbosDoResgate (RF6)", () => {
+  it("usa os liberados mais antigos", () => {
+    const lista = carimbos(12);
+    const r = escolherCarimbosDoResgate({ carimbos: [...lista].reverse(), meta: 10, agora, nomeCliente: "João" });
+    expect(r).toEqual({ ok: true, carimboIds: lista.slice(0, 10).map((c) => c.id) });
+  });
+
+  it("ignora os a liberar, retirados e já usados", () => {
+    const lista = carimbos(12, 2);
+    lista[0].retiradoEm = agora;
+    lista[1].resgateId = "r1";
+    expect(escolherCarimbosDoResgate({ carimbos: lista, meta: 8, agora, nomeCliente: "João" })).toEqual({
+      ok: true,
+      carimboIds: lista.slice(2, 10).map((c) => c.id),
+    });
+  });
+
+  it("9 liberados com meta 10: recusado", () => {
+    expect(escolherCarimbosDoResgate({ carimbos: carimbos(12, 3), meta: 10, agora, nomeCliente: "João" })).toEqual({
+      ok: false,
+      motivo: "carimbos_insuficientes",
+      mensagem: "O cartão de João não tem mais carimbos liberados suficientes. Nada foi registrado.",
+    });
+  });
+});
+
+describe("podeDesfazerResgate (RF7)", () => {
+  it("recusa resgate já desfeito", () => {
+    expect(podeDesfazerResgate({ desfeitoEm: null })).toEqual({ ok: true });
+    expect(podeDesfazerResgate({ desfeitoEm: agora })).toMatchObject({ ok: false, motivo: "resgate_ja_desfeito" });
+  });
+});
+
+describe("podeCancelarPorFidelidade (RF5)", () => {
+  it("venda sem carimbo ou com carimbo não usado: pode", () => {
+    expect(podeCancelarPorFidelidade({ carimbo: null, nomeCliente: "João" })).toEqual({ ok: true });
+    expect(podeCancelarPorFidelidade({ carimbo: { resgateId: null }, nomeCliente: "João" })).toEqual({ ok: true });
+  });
+
+  it("carimbo em resgate: recusado com a mensagem da spec 10.3", () => {
+    expect(podeCancelarPorFidelidade({ carimbo: { resgateId: "r1" }, nomeCliente: "João" })).toEqual({
+      ok: false,
+      motivo: "venda_em_resgate",
+      mensagem: "Esta venda já entrou no prêmio que João resgatou. Para cancelar, desfaça o resgate no cartão de João.",
+    });
   });
 });
