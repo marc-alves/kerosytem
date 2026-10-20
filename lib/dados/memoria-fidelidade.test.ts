@@ -13,7 +13,8 @@ const fid = (empresaId: string) => criarRepositorioFidelidadeEmMemoria(banco, em
 const programa = { meta: 2, premio: "1 salgado grátis", valorMinimo: null, diasLiberacao: 0 };
 
 beforeEach(async () => {
-  banco = criarSemente(agora);
+  // Sem a fidelidade da semente: cada teste monta o que precisa.
+  banco = { ...criarSemente(agora), programas: [], carimbos: [], resgates: [], cartoes: [] };
   n = 0;
   await fid(EMPRESA_A).salvarPrograma(programa, agora);
   // a-ven-5: João, pendente na semente.
@@ -96,5 +97,20 @@ describe("lerCartaoPublico (RF9)", () => {
     expect(lerCartaoPublico(banco, "nova")).not.toBeNull();
     banco.empresas[0].modulosAtivos = ["indicacao"];
     expect(lerCartaoPublico(banco, "nova")).toBeNull();
+  });
+});
+
+describe("semente da fidelidade (F11)", () => {
+  it("um cliente em cada situação do cartão", async () => {
+    const { estadoCartao } = await import("@/lib/fidelidade/cartao");
+    const semente = criarSemente(agora);
+    const repo = criarRepositorioFidelidadeEmMemoria(semente, EMPRESA_A);
+    const estado = async (id: string) =>
+      estadoCartao({ carimbos: (await repo.cartaoCliente(id))!.carimbos, meta: 10, agora });
+    expect(await estado("a-cli-ana")).toMatchObject({ completo: true, podeResgatar: true });
+    expect(await estado("a-cli-bia")).toMatchObject({ completo: true, podeResgatar: false, aLiberar: 4 });
+    expect(await estado("a-cli-carla")).toMatchObject({ noCartao: 2, completo: false });
+    expect(await estado("a-cli-joao")).toMatchObject({ noCartao: 2, liberados: 1 });
+    expect(await criarRepositorioFidelidadeEmMemoria(semente, EMPRESA_B).programa()).toBeNull();
   });
 });

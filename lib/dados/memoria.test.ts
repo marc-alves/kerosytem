@@ -109,7 +109,9 @@ describe("leituras (T39)", () => {
 
   it("filtra vendas por indicador, período e situação, mais novas primeiro (spec 10.7)", async () => {
     const a = repo(EMPRESA_A);
-    const ids = async (filtro: Parameters<typeof a.listarVendas>[0]) => (await a.listarVendas(filtro)).map((v) => v.id);
+    // Só as vendas de João e Pedro; as dos clientes da fidelidade (a-ven-ana-1…) ficam de fora.
+    const ids = async (filtro: Parameters<typeof a.listarVendas>[0]) =>
+      (await a.listarVendas(filtro)).map((v) => v.id).filter((id) => /^a-ven-\d+$/.test(id));
     expect(await ids({ indicador: "todos", desde: null, situacao: "todas" })).toEqual([
       "a-ven-5",
       "a-ven-4",

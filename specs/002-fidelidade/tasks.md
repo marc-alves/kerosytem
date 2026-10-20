@@ -20,7 +20,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 
 ## Fase 3 — Casos de uso sobre o banco em memória
 - [x] F10. Tipos e banco em memória: `ProgramaFidelidade`, `Carimbo` (com `liberadoEm`, `resgateId`, `retiradoEm`), `Resgate`, `CartaoFidelidade` no `Banco`; interface `RepositorioFidelidade` em `lib/dados/tipos.ts` e implementação em `lib/dados/memoria.ts`; chave do link com 32 bytes aleatórios em base64url; teste de isolamento entre as duas empresas (depende de F8)
-- [ ] F11. Semente da fidelidade: programa na primeira empresa (10 carimbos, "1 salgado grátis", 7 dias) com clientes no meio, completo a liberar, completo liberado e com resgate; segunda empresa sem programa (depende de F10)
+- [x] F11. Semente da fidelidade: programa na primeira empresa (10 carimbos, "1 salgado grátis", 7 dias) com clientes no meio, completo a liberar, completo liberado e com resgate; segunda empresa sem programa (depende de F10)
 - [ ] F12. `salvarPrograma` (RF1, RF2) em `lib/casos-de-uso/fidelidade.ts`, com as mensagens da spec 10.4 (depende de F2, F10)
 - [ ] F13. Carimbo na confirmação: `confirmarRecebimento` dá o carimbo (só com o módulo ativo e o programa criado) na mesma gravação, com `liberadoEm`, e devolve o estado do cartão e a mensagem (RF3, RF4); os testes da 001 continuam passando (depende de F3, F4, F6, F10)
 - [ ] F14. Cancelamento: `cancelarVenda` retira o carimbo não usado e **recusa** venda com carimbo em resgate não desfeito (RF5), devolvendo o id do cliente para o link da spec 10.3 (depende de F5, F13)
