@@ -29,7 +29,7 @@ Validar que a Shirley consegue operar o programa de indicação sozinha, sem pla
 ### Dentro do MVP
 - Login da dona (Supabase Auth).
 - Cadastro de indicadores (nome + telefone).
-- Geração de códigos configuráveis (normal e de primeira compra), com validade opcional e limite de usos (aviso).
+- Geração de códigos configuráveis (normal e de primeira compra), com validade opcional e limite de usos (aviso); desativar e reativar código (sem edição).
 - Clientes identificados por telefone (nome + telefone).
 - Lançamento de venda com código, cálculo automático de desconto e comissão.
 - Confirmação de recebimento da venda.
@@ -59,15 +59,15 @@ Validar que a Shirley consegue operar o programa de indicação sozinha, sem pla
 
 ## 7. Regras de negócio
 
-**RN1 — Código.** Cada código pertence a um indicador e define, na criação: `desconto_pct` (para o cliente), `comissao_pct` (para o indicador), tipo (`normal` ou `primeira_compra`), validade opcional e `limite_usos` (padrão **10**, editável). Códigos são únicos e **não diferenciam maiúsculas de minúsculas** (`Camila5` = `camila5`); são guardados em minúsculas.
+**RN1 — Código.** Cada código pertence a um indicador e define, na criação: `desconto_pct` (para o cliente), `comissao_pct` (para o indicador), tipo (`normal` ou `primeira_compra`), validade opcional e `limite_usos` (padrão **10**). Esses valores são **definidos na criação** e não podem ser editados depois; para renovar ou mudar condições, cria-se um novo código. Códigos são únicos e **não diferenciam maiúsculas de minúsculas** (`Camila5` = `camila5`); são guardados em minúsculas.
 
-**RN2 — Validade.** Um código é válido quando está ativo e (não tem data de validade ou a data não passou). Pode ser desativado a qualquer momento. Código inválido é recusado com mensagem clara.
+**RN2 — Validade.** Um código é válido quando está ativo e (não tem data de validade ou a data não passou). A validade é um dia: o código vale **até 23h59 desse dia, no horário de Brasília**. Pode ser desativado e reativado a qualquer momento (único ajuste permitido depois da criação). Código inválido é recusado com mensagem clara.
 
-**RN3 — Uso e limite (apenas aviso).** O cliente pode usar o mesmo código quantas vezes quiser enquanto ele for válido. Cada venda **confirmada** com o código conta como um uso; vendas pendentes não contam. Quando os usos atingem `limite_usos`, o sistema exibe um **aviso visual destacado** ("este código atingiu N usos, considere gerar um novo código para {indicador}") no detalhe do indicador, na lista de códigos e na tela de Nova venda ao digitar o código. **O limite não bloqueia a venda**: seu objetivo é lembrar a dona de renovar ou repensar o código do indicador.
+**RN3 — Uso e limite (apenas aviso).** O cliente pode usar o mesmo código quantas vezes quiser enquanto ele for válido. Cada venda **confirmada** com o código conta como um uso; vendas pendentes não contam. Quando os usos atingem `limite_usos`, o sistema exibe um **aviso visual destacado** ("este código atingiu N usos, considere gerar um novo código para {indicador}") no detalhe do indicador, na lista de códigos e na tela de Nova venda ao digitar o código. No detalhe do indicador e na lista de códigos, o aviso traz o botão **Criar novo código**. **O limite não bloqueia a venda**: seu objetivo é lembrar a dona de renovar ou repensar o código do indicador.
 
 **RN4 — Telefone.** O cliente é identificado pelo **telefone normalizado**: apenas dígitos, com DDI 55 acrescentado quando ausente, resultando em 12 ou 13 dígitos. Formatos diferentes do mesmo número (`61 99999-9999`, `+55 (61) 99999-9999`) são o mesmo cliente. O telefone é único por cliente. O indicador também tem telefone **obrigatório** e único. Telefone fora do padrão é recusado.
 
-**RN5 — Primeira compra.** Código do tipo `primeira_compra` só é aceito se o cliente **não possui nenhuma venda confirmada**. Se o cliente tem venda pendente, o código é aceito, mas a prévia exibe o aviso "este cliente tem venda aguardando confirmação".
+**RN5 — Primeira compra.** Código do tipo `primeira_compra` só é aceito se o cliente **não possui nenhuma venda confirmada**. Se o cliente tem venda pendente, o código é aceito, mas a prévia exibe o aviso "este cliente tem venda aguardando confirmação". Ao **confirmar** uma venda feita com código de primeira compra, o sistema revalida: se o cliente já tem outra venda confirmada, a confirmação é recusada com mensagem clara (a venda deve ser cancelada e refeita com outro código ou sem código).
 
 **RN6 — Vínculo do cliente.** O vínculo cliente→indicador nasce na **primeira venda confirmada** feita com um código, ligando o cliente ao indicador dono do código. Depois disso, só são aceitos códigos **desse mesmo indicador**; códigos de outros são recusados. Enquanto não existe venda confirmada, o cliente não tem vínculo. Ao **confirmar** uma venda, o sistema revalida: se o cliente já tem vínculo com **outro** indicador, a confirmação é recusada com mensagem clara (a venda deve ser cancelada e refeita com um código do indicador vinculado).
 
@@ -81,9 +81,9 @@ Validar que a Shirley consegue operar o programa de indicação sozinha, sem pla
 - Os percentuais aplicados ficam **gravados na venda** (mudanças futuras no código não alteram vendas passadas).
 - A comissão é calculada e gravada no lançamento, mas **só entra no saldo quando a venda é confirmada**.
 
-**RN9 — Venda sem código.** O código é opcional. Venda sem código não gera desconto nem comissão, mas fica registrada e segue o mesmo ciclo da RN10 (necessário para a fidelidade na v2).
+**RN9 — Venda sem código.** O código é opcional. Venda sem código não gera desconto nem comissão, mas fica registrada e segue o mesmo ciclo da RN10 (necessário para a fidelidade na v2). Venda sem código **não gera mensagem** para o cliente (ver seção 9).
 
-**RN10 — Ciclo da venda.** Estados: `pendente` → `confirmada`, e `pendente` ou `confirmada` → `cancelada`. Toda venda nasce `pendente`. Apenas a dona confirma, pelo botão **Confirmar recebimento**. Vendas não são editadas.
+**RN10 — Ciclo da venda.** Estados: `pendente` → `confirmada`, e `pendente` ou `confirmada` → `cancelada`. Toda venda nasce `pendente`. Apenas a dona confirma, pelo botão **Confirmar recebimento**. Vendas não são editadas. A venda registra a data e hora do lançamento, da confirmação e do cancelamento. Na tela, os estados aparecem como **Aguardando pagamento** (`pendente`), **Pago** (`confirmada`) e **Cancelada** (`cancelada`).
 
 **RN11 — Saldo e pagamentos ao indicador.** `saldo = Σ comissões das vendas confirmadas dos códigos do indicador − Σ pagamentos ao indicador não cancelados`. Comissões de vendas pendentes aparecem à parte, como "a confirmar", e não entram no saldo. Um pagamento tem tipo `dinheiro` ou `credito_produtos`, valor e observação opcional. Não é permitido pagar mais que o saldo.
 
@@ -91,7 +91,7 @@ Validar que a Shirley consegue operar o programa de indicação sozinha, sem pla
 
 ## 8. Mensagem para o cliente
 
-Formato WhatsApp (`*texto*` = negrito, `~texto~` = riscado). O botão **Copiar** copia o texto cru com esses marcadores. A mensagem é gerada no lançamento da venda (pendente).
+Formato WhatsApp (`*texto*` = negrito, `~texto~` = riscado). O botão **Copiar** copia o texto cru com esses marcadores. A mensagem é gerada no lançamento da venda (pendente) e só existe para venda **com código** (RN9).
 
 ```
 *{nome}*, você ganhou {desconto}% de desconto com o código {codigo}!
@@ -109,27 +109,31 @@ Valores em formato brasileiro (`R$ 1.234,56`) com **espaço comum** (não usar e
 
 ## 9. Fluxo principal
 
-**Lançar venda**
-1. Shirley abre "Nova venda" e digita o telefone do cliente. O sistema mostra "cliente novo" (pede o nome) ou "cliente existente: {nome}".
-2. Digita o código (opcional) e o valor da compra.
-3. O sistema valida o código (RN2 a RN7) e mostra a prévia: desconto e valor final, mais os avisos aplicáveis (limite de usos atingido, cliente com venda pendente). **A prévia não exibe a comissão**; ela só aparece no detalhe do indicador.
-4. Shirley confirma o lançamento; a venda é gravada como **pendente**.
-5. O sistema exibe a mensagem pronta com botão **Copiar**.
+**Lançar venda** (no máximo 3 campos por tela)
+1. **Tela 1 — Cliente.** Shirley abre "Nova venda" e digita o telefone do cliente. Se o cliente existe, o sistema mostra "cliente existente: {nome}". Se é novo, o campo de nome aparece logo abaixo do telefone.
+2. **Tela 2 — Compra.** Digita o código (opcional) e o valor da compra. O sistema valida o código (RN2 a RN7).
+3. **Tela 3 — Conferência.** Prévia com desconto e valor final, mais os avisos aplicáveis (limite de usos atingido, cliente com venda pendente). **A prévia não exibe a comissão**; ela só aparece no detalhe do indicador. Shirley toca em **Lançar venda**; a venda é gravada como **pendente**.
+4. **Sucesso.**
+   - Venda **com código**: o sistema exibe a mensagem pronta com botão **Copiar mensagem**.
+   - Venda **sem código**: o sistema exibe "Venda lançada" e o valor, sem mensagem.
+   - Nos dois casos, a tela tem o botão **Nova venda** e o link **Desfazer esta venda** (cancela a venda pendente recém-lançada, RN12).
 
 **Confirmar recebimento**
-6. Quando o cliente paga, Shirley toca em **Confirmar recebimento** (no detalhe do indicador ou na lista de vendas). A venda vira `confirmada`: a comissão entra no saldo, o uso do código é contado e, se for a primeira, o vínculo é criado (RN6).
+5. Quando o cliente paga, Shirley toca em **Confirmar recebimento** (no detalhe do indicador ou na lista de vendas). O sistema revalida o vínculo (RN6) e, se o código for de primeira compra, a RN5. A venda vira `confirmada`: a comissão entra no saldo, o uso do código é contado e, se for a primeira, o vínculo é criado (RN6).
 
 **Pagar o indicador**
-7. No detalhe do indicador, Shirley usa **Registrar pagamento** (dinheiro ou crédito em produtos), limitado ao saldo.
+6. No detalhe do indicador, Shirley usa **Registrar pagamento** (dinheiro ou crédito em produtos), limitado ao saldo.
 
 ## 10. Telas do MVP
 
 1. **Login** (Supabase Auth).
 2. **Lista de indicadores**: saldo confirmado e valor "a confirmar" de cada um, mais cadastro (nome + telefone).
-3. **Detalhe do indicador**: códigos com contagem de usos e aviso de limite; vendas vinculadas (pendentes e confirmadas) com o botão **Confirmar recebimento**; pagamentos ao indicador e botão **Registrar pagamento**.
-4. **Criar código**: desconto, comissão, tipo, validade, limite de usos.
-5. **Nova venda**: prévia e mensagem.
-6. **Lista de vendas**: filtro por indicador, período e status; com **Confirmar recebimento** nas pendentes.
+3. **Detalhe do indicador**: códigos com contagem de usos, aviso de limite (com **Criar novo código**) e **Desativar**/**Reativar**; vendas vinculadas ("Aguardando pagamento" e "Pago") com o botão **Confirmar recebimento** nas que aguardam pagamento e **Cancelar venda**; pagamentos ao indicador com **Registrar pagamento** e **Cancelar pagamento**.
+4. **Criar código**: desconto, comissão, tipo, validade, limite de usos (sem edição depois de criado).
+5. **Nova venda**: tela 1 (cliente), tela 2 (código e valor), tela 3 (conferência) e tela de sucesso (mensagem ou "Venda lançada", com **Desfazer esta venda**), conforme a seção 9.
+6. **Lista de vendas**: filtro por indicador, período (pela data de lançamento) e situação ("Aguardando pagamento", "Pago", "Cancelada"); com **Confirmar recebimento** nas que aguardam pagamento e **Cancelar venda**.
+
+Os estados da venda aparecem sempre com os rótulos de exibição **Aguardando pagamento** (`pendente`), **Pago** (`confirmada`) e **Cancelada** (`cancelada`), conforme o `DESIGN.md`.
 
 ## 11. Critérios de aceite
 
@@ -146,6 +150,7 @@ Valores em formato brasileiro (`R$ 1.234,56`) com **espaço comum** (não usar e
 | Primeira compra com venda pendente | cliente só com venda pendente, `primeiraamanda` | aceito, com aviso de venda pendente na prévia |
 | Código de outro indicador | João (vinculado à Camila) usa código da Amanda | recusado |
 | Confirmação com vínculo conflitante | cliente com vínculo na Camila; venda pendente da Amanda | confirmação recusada com mensagem clara |
+| Confirmação de primeira compra com venda já confirmada | cliente com duas vendas pendentes com `primeiraamanda`; confirma a primeira e tenta confirmar a segunda | segunda confirmação recusada com mensagem clara |
 | Autoindicação | cliente com o mesmo telefone do indicador | recusado |
 | Código inativo ou vencido | `camila5` desativado | recusado |
 | Limite de usos | código com 10 vendas confirmadas | aviso visual destacado; a 11ª venda é **aceita** |
@@ -153,7 +158,8 @@ Valores em formato brasileiro (`R$ 1.234,56`) com **espaço comum** (não usar e
 | Pagamento acima do saldo | saldo R$ 10,00, pagamento R$ 15,00 | recusado |
 | Cancelar venda pendente | qualquer venda pendente | cancelada, sem efeito no saldo |
 | Cancelar confirmada com saldo já pago | comissão R$ 3,14 já paga | cancelamento bloqueado |
-| Alteração de código | muda o desconto de `camila5` depois | vendas antigas mantêm os valores gravados |
+| Código desativado não afeta vendas antigas | `camila5` com vendas lançadas e confirmadas é desativado | vendas antigas mantêm valores, status e comissões; saldo da Camila não muda |
+| Venda sem código | João, sem código, R$ 50,00 | venda **pendente** sem desconto nem comissão; tela "Venda lançada" sem mensagem |
 | Acesso sem login | abrir qualquer tela sem sessão | redirecionado ao login; dados inacessíveis |
 
 ## 12. Pontos em aberto
