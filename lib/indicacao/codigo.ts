@@ -1,5 +1,6 @@
 import type {
   AvisoCodigo,
+  ClienteParaValidar,
   CodigoParaValidar,
   Data,
   ResultadoCodigo,
@@ -45,14 +46,15 @@ export function contarUsos(vendas: ReadonlyArray<{ status: StatusVenda }>): numb
 }
 
 /**
- * RN2 e RN3. `codigo` é `null` quando o digitado não existe no banco.
- * O limite de usos nunca recusa: só devolve o aviso.
+ * RN2, RN3, RN5, RN6 e RN7. `codigo` é `null` quando o digitado não existe no banco.
+ * O limite de usos e a venda pendente nunca recusam: só devolvem aviso.
  */
 export function validarCodigo(entrada: {
   codigo: CodigoParaValidar | null;
+  cliente: ClienteParaValidar;
   agora: Date;
 }): ResultadoCodigo {
-  const { codigo, agora } = entrada;
+  const { codigo, cliente, agora } = entrada;
 
   if (codigo === null) {
     return {
@@ -78,11 +80,43 @@ export function validarCodigo(entrada: {
     };
   }
 
+  if (cliente.telefone === codigo.indicadorTelefone) {
+    return {
+      ok: false,
+      motivo: "autoindicacao",
+      mensagem: `Este telefone é o mesmo de ${codigo.indicadorNome}. Quem indica não pode usar o próprio código.`,
+    };
+  }
+
+  if (cliente.vinculo !== null && cliente.vinculo.indicadorId !== codigo.indicadorId) {
+    const nome = cliente.vinculo.indicadorNome;
+    return {
+      ok: false,
+      motivo: "cliente_de_outro_indicador",
+      mensagem: `Este cliente já usa os códigos de ${nome}. Use um código de ${nome}.`,
+    };
+  }
+
+  if (codigo.tipo === "primeira_compra" && cliente.temVendaConfirmada) {
+    return {
+      ok: false,
+      motivo: "primeira_compra_ja_feita",
+      mensagem: `O código ${codigo.codigo} é só para a primeira compra, e este cliente já comprou. Use outro código.`,
+    };
+  }
+
   const avisos: AvisoCodigo[] = [];
   if (codigo.usos >= codigo.limiteUsos) {
     avisos.push({
       tipo: "limite_atingido",
       mensagem: `Este código atingiu ${codigo.usos} usos, considere gerar um novo código para ${codigo.indicadorNome}.`,
+    });
+  }
+
+  if (codigo.tipo === "primeira_compra" && cliente.temVendaPendente) {
+    avisos.push({
+      tipo: "cliente_com_venda_pendente",
+      mensagem: "Este cliente tem venda aguardando confirmação.",
     });
   }
 

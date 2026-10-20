@@ -43,6 +43,8 @@ export type CodigoParaValidar = {
   codigo: string;
   indicadorId: string;
   indicadorNome: string;
+  /** Para recusar autoindicação (RN7). */
+  indicadorTelefone: Telefone;
   tipo: TipoCodigo;
   descontoBp: PontosBase;
   comissaoBp: PontosBase;
@@ -53,12 +55,29 @@ export type CodigoParaValidar = {
   usos: number;
 };
 
+/** Cliente da venda, com o que importa para validar o código (RN5, RN6, RN7). */
+export type ClienteParaValidar = {
+  /** Telefone já normalizado (RN4); cliente novo também tem. */
+  telefone: Telefone;
+  /** Vínculo criado na primeira venda confirmada com código (RN6); `null` enquanto não houver. */
+  vinculo: { indicadorId: string; indicadorNome: string } | null;
+  temVendaConfirmada: boolean;
+  temVendaPendente: boolean;
+};
+
 /** Avisos não recusam a venda; aparecem na tela (RN3, RN5). */
 export type AvisoCodigo = {
-  tipo: "limite_atingido";
+  tipo: "limite_atingido" | "cliente_com_venda_pendente";
   mensagem: string;
 };
 
 export type ResultadoCodigo =
   | { ok: true; codigo: CodigoParaValidar; avisos: AvisoCodigo[] }
-  | Falha<"codigo_nao_encontrado" | "codigo_desativado" | "codigo_vencido">;
+  | Falha<
+      | "codigo_nao_encontrado"
+      | "codigo_desativado"
+      | "codigo_vencido"
+      | "autoindicacao"
+      | "cliente_de_outro_indicador"
+      | "primeira_compra_ja_feita"
+    >;
