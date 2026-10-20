@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { BotaoCopiar } from "@/app/(app)/vendas/[id]/lancada/botao-copiar";
+import { DesfazerVenda } from "@/app/(app)/vendas/[id]/lancada/desfazer-venda";
 import { classesBotao } from "@/components/botao";
 import { Cabecalho } from "@/components/cabecalho";
 import { Cartao } from "@/components/cartao";
@@ -52,6 +53,10 @@ async function VendaLancada({ params }: { params: PageProps<"/vendas/[id]/lancad
         <Link href="/vendas/nova" className={classesBotao(mensagem ? "secundario" : "primario")}>
           Nova venda
         </Link>
+        {/* Só enquanto aguarda pagamento; depois de desfeita, some (spec 10.6). */}
+        {venda.status === "pendente" && (
+          <DesfazerVenda vendaId={venda.id} valor={formatarReais(venda.valorFinal)} cliente={venda.cliente.nome} />
+        )}
       </div>
     </>
   );
