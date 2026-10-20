@@ -2,32 +2,14 @@ import type {
   AvisoCodigo,
   ClienteParaValidar,
   CodigoParaValidar,
-  Data,
   ResultadoCodigo,
   StatusVenda,
 } from "@/lib/indicacao/tipos";
-
-const FUSO_BRASILIA = "America/Sao_Paulo";
+import { dataEmBrasilia, formatarData } from "@/lib/indicacao/periodo";
 
 /** RN1: códigos não diferenciam maiúsculas e são guardados em minúsculas, sem espaços. */
 export function normalizarCodigo(texto: string): string {
   return texto.replace(/\s+/g, "").toLowerCase();
-}
-
-/** Dia de hoje em Brasília, no formato `AAAA-MM-DD`. */
-function hojeEmBrasilia(agora: Date): Data {
-  // O formato en-CA já sai como AAAA-MM-DD.
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: FUSO_BRASILIA,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(agora);
-}
-
-function formatarData(data: Data): string {
-  const [ano, mes, dia] = data.split("-");
-  return `${dia}/${mes}/${ano}`;
 }
 
 /** RN2: ativo e (sem validade ou ainda dentro do dia de validade, até 23h59 de Brasília). */
@@ -37,7 +19,7 @@ export function codigoValido(entrada: {
 }): boolean {
   const { codigo, agora } = entrada;
   if (!codigo.ativo) return false;
-  return codigo.validoAte === null || hojeEmBrasilia(agora) <= codigo.validoAte;
+  return codigo.validoAte === null || dataEmBrasilia(agora) <= codigo.validoAte;
 }
 
 /** RN3: cada venda confirmada conta como um uso; pendentes e canceladas não contam. */

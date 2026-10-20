@@ -94,6 +94,16 @@ Componentes compartilhados de tela: cartão de venda (com as duas ações e os d
 
 Leituras ficam em `lib/dados/` (servidor, usando o cliente Supabase), separadas das regras puras.
 
+## Dados mockados (provisório, decidido em 2026-10-20)
+
+Até existir o projeto Supabase (T9), casos de uso e telas rodam sobre um **banco em memória**, para não travar o resto:
+
+- `lib/dados/tipos.ts`: as linhas das tabelas (mesmos campos da seção "Modelo de dados") e a interface `RepositorioIndicacao`, já presa a uma empresa: leituras da T39 (fazem o papel das views) e gravações (fazem o papel das RPCs, sem receber `empresa_id`).
+- `lib/dados/memoria.ts`: implementação em memória da interface; `lib/dados/semente.ts`: as duas empresas fictícias da T13.
+- `lib/casos-de-uso/indicacao.ts`: lê, aplica `lib/indicacao/` e grava pela interface. Testado contra o banco em memória, cobrindo a seção 11 da spec.
+- `lib/dados/sessao.ts`: a "empresa da sessão" é fixa (a primeira da semente) e o banco vive na memória do servidor: reiniciar o `npm run dev` volta à semente.
+- Na troca pelo Supabase (T43), só muda a implementação da interface e a sessão; casos de uso, actions e telas ficam.
+
 ## Testes
 
 - Testes unitários do módulo de regras e da formatação, cobrindo a tabela de critérios de aceite da spec (seção 11).

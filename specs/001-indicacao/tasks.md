@@ -6,6 +6,8 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 
 **Revisão de 2026-10-20 (Kero System):** o app deixa de ser de um único negócio e passa a atender qualquer empresa, com cadastro de empresa e módulos. As tarefas da base (cadastro, `empresa_id`, RLS por empresa, troca da marca) estão em `specs/000-empresas/tasks.md` com prefixo **E**; as tarefas daqui que dependem delas citam "depende de Ex". A troca do nome no código (E1, E2) pode ser feita já.
 
+**Revisão de 2026-10-20 (dados mockados):** enquanto o Supabase não existe (T9), casos de uso e telas usam um banco em memória (T42, ver `plan.md`, "Dados mockados"). T39, T40, T14 e T15 são feitas sobre ele; a T43 troca pelo Supabase depois da T11/T12.
+
 **Definição de pronto (vale para toda tarefa):** testes passando (`npm test`), `npm run lint` sem erros, critério da spec citado na tarefa atendido, checkbox marcado `[x]` e um commit só para a tarefa. **Tarefas de tela:** comportamento e textos da subseção da spec 10.x citada, checklist do `DESIGN.md` atendido, conferido em ~360px de largura e com a fonte do sistema aumentada.
 
 ## Fase 0 — Sincronizar o plano
@@ -33,10 +35,12 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [ ] T13. Seed de desenvolvimento com **duas empresas fictícias** (ex.: "Lanchonete da Maria" e "Pastelaria do Zé") e **telefones fictícios**: na primeira, Camila, Amanda, `camila5`, `primeiraamanda`, João; na segunda, outro `camila5` e o mesmo telefone do João, para testar o isolamento (depende de T11, E6)
 
 ## Fase 3 — Casos de uso no servidor
+- [x] T42. Banco em memória (provisório): tipos das linhas e interface `RepositorioIndicacao` em `lib/dados/tipos.ts`, implementação em `lib/dados/memoria.ts`, semente com as duas empresas fictícias da T13 em `lib/dados/semente.ts` e empresa da sessão fixa em `lib/dados/sessao.ts`; testes de isolamento entre as duas empresas (depende de T0)
+- [ ] T43. Trocar o banco em memória pelo Supabase: implementar `RepositorioIndicacao` com as views e RPCs e a sessão com `empresa_atual()`; rodar os mesmos testes dos casos de uso contra o banco de desenvolvimento (depende de T11, T12, E9)
 - [ ] T14. `lancarVenda` (sempre na empresa da sessão): cria o cliente se for novo, valida (T4, T5), calcula (T36), grava como **pendente** numa transação e devolve o id da venda; mais `previaVenda` (valida e calcula sem gravar, devolve prévia e avisos para a tela 3 da spec 10.5) (depende de T6, T36, T11)
 - [ ] T15. `confirmarRecebimento` (revalida o vínculo e a primeira compra; cria o vínculo na primeira confirmação; grava `confirmada_em`) e `cancelarVenda` (livre para pendente e confirmada; recusa só venda já cancelada; grava `cancelada_em`) (depende de T14, T37)
 - [ ] ~~T16. `registrarPagamentoIndicador` e `cancelarPagamento`~~ — **cancelada**: não há pagamento ao indicador no sistema.
-- [ ] T39. Consultas de leitura em `lib/dados/` (todas restritas à empresa da sessão pela RLS): buscar cliente por telefone; lista de indicadores com resumo; detalhe do indicador (códigos com usos, vendas pendentes e confirmadas); venda por id (tela de sucesso); vendas com filtros de indicador, período (Hoje, 7 dias, 30 dias, Tudo, em horário de Brasília) e situação (depende de T11)
+- [x] T39. Consultas de leitura em `lib/dados/` (todas restritas à empresa da sessão pela RLS): buscar cliente por telefone; lista de indicadores com resumo; detalhe do indicador (códigos com usos, vendas pendentes e confirmadas); venda por id (tela de sucesso); vendas com filtros de indicador, período (Hoje, 7 dias, 30 dias, Tudo, em horário de Brasília) e situação (depende de T11)
 - [ ] T40. Actions `cadastrarIndicador` (telefone normalizado e único na empresa), `criarCodigo` (código normalizado e único na empresa, desconto 0–100%, data de hoje em diante, limite ≥ 1) e `definirCodigoAtivo`, com as mensagens da spec 10.2 e 10.4 (depende de T11, T38)
 
 ## Fase 4 — Base visual (`DESIGN.md`)
