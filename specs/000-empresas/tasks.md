@@ -4,7 +4,7 @@ Tarefas com prefixo **E** para não confundir com as `T` da `001-indicacao`. As 
 
 ## Fase 0 — Trocar a marca para Kero System (pode começar já)
 - [x] E1. Tirar "Kero Salgados" do código: `app/layout.tsx` (título "Kero System" e descrição "Indicações, vendas e clientes do seu negócio") e `components/cabecalho.tsx` (provisoriamente "Kero System"; o nome da empresa entra na E9). Verificação: `grep -rni "kero salgados" app components lib` sem resultado; testes e lint passando
-- [ ] E2. Revisar textos de interface e testes atrás de nomes da empresa antiga ou da "dona" (ex.: textos fixos, exemplos, seed planejado) e trocar por exemplos genéricos ("Lanchonete da Maria"); `grep -rni "kero salgados\|shirley" app components lib` sem resultado (depende de E1)
+- [x] E2. Revisar textos de interface e testes atrás de nomes da empresa antiga ou da "dona" (ex.: textos fixos, exemplos, seed planejado) e trocar por exemplos genéricos ("Lanchonete da Maria"); `grep -rni "kero salgados\|shirley" app components lib` sem resultado (depende de E1)
 - [ ] E3. Logo e ícone do **Kero System**: arquivo oficial em `public/` e `app/favicon.ico` trocado (você fornece o arquivo; não recriar). Substitui a T28 da 001 (depende de E1)
 
 ## Fase 1 — Regras puras
