@@ -10,7 +10,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 ## Fase 1 — Regras puras (sem banco, sem tela, em `lib/`)
 - [x] T1. Configurar Jest e o script `npm test` (verificação: um teste de exemplo em `lib/indicacao/` passa)
 - [x] T2. `normalizarCodigo` e `normalizarTelefone` (RN1, RN4): maiúsculas/minúsculas; formatos de telefone equivalentes; telefone inválido recusado (depende de T1)
-- [ ] T3. `calcularVenda` (RN8): centavos inteiros, percentuais em centésimos de ponto, arredondamento metade para cima; caso 110,00 / 5% / 3% → desconto 5,50, final 104,50, comissão 3,14 (depende de T1)
+- [x] T3. `calcularVenda` (RN8): centavos inteiros, percentuais em centésimos de ponto, arredondamento metade para cima; caso 110,00 / 5% / 3% → desconto 5,50, final 104,50, comissão 3,14 (depende de T1)
 - [ ] T4. `validarCodigo` — código (RN2, RN3): ativo e validade recusam (válido até 23h59 de Brasília do dia de validade); limite de usos **não recusa**, apenas devolve o aviso (`limiteAtingido`); só vendas confirmadas contam (9 confirmadas + 5 pendentes = sem aviso) (depende de T2)
 - [ ] T5. `validarCodigo` — cliente (RN5, RN6, RN7): primeira compra só sem venda confirmada, com aviso se houver venda pendente; vínculo ao indicador; recusa de autoindicação por telefone (depende de T4)
 - [ ] T26. `formatarReais` e `formatarPercentual` em `lib/formato/` (seção 8, `DESIGN.md` seção 5): `R$ 1.234,56` com espaço comum (o `Intl` do pt-BR usa espaço não separável: trocar); `5%` e `7,5%` (depende de T1)
