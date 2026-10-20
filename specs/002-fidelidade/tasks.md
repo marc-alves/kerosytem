@@ -26,7 +26,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F14. Cancelamento: `cancelarVenda` retira o carimbo não usado e **recusa** venda com carimbo em resgate não desfeito (RF5), devolvendo o id do cliente para o link da spec 10.3 (depende de F5, F13)
 - [x] F15. `registrarResgate` (os liberados mais antigos, recusa sem liberados suficientes), `desfazerResgate` (solta os carimbos) e `gerarNovoLink` (RF6, RF7, RF8) (depende de F5, F10)
 - [x] F16. Leituras: programa, lista de cartões com busca por nome ou telefone, cartão do cliente com histórico, `carimbo` na `VendaListada`, e `cartaoPublico(chave)` fora do repositório da empresa, devolvendo só os campos da RF9 ou nada (link inválido, trocado ou módulo desligado) (depende de F7, F10)
-- [ ] F17. Montar o link completo no servidor com `APP_URL` ou, sem ela, com o host da requisição (depende de F16)
+- [x] F17. Montar o link completo no servidor com `APP_URL` ou, sem ela, com o host da requisição (depende de F16)
 
 ## Fase 4 — Telas da empresa (seguem a spec 10.x citada e o checklist)
 - [ ] F18. Componente **cartão de carimbos** (M espaços preenchidos até o exibido, liberado e a liberar com ícones diferentes, "N de M" escrito), com teste (depende de F4, T30)

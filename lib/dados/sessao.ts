@@ -1,8 +1,19 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { connection } from "next/server";
-import { criarRepositorioEmMemoria } from "@/lib/dados/memoria";
+import type { FidelidadeNaVenda } from "@/lib/casos-de-uso/vendas";
+import { gerarChaveCartao } from "@/lib/dados/chave";
+import { criarRepositorioEmMemoria, criarRepositorioFidelidadeEmMemoria, lerCartaoPublico } from "@/lib/dados/memoria";
 import { criarSemente, EMPRESA_A, VERSAO_SEMENTE } from "@/lib/dados/semente";
-import type { Banco, Empresa, Modulo, RepositorioIndicacao } from "@/lib/dados/tipos";
+import type {
+  Banco,
+  CartaoPublicoDados,
+  Empresa,
+  Modulo,
+  RepositorioFidelidade,
+  RepositorioIndicacao,
+} from "@/lib/dados/tipos";
+import { enderecoDoSite, linkDoCartao } from "@/lib/fidelidade/link";
 import { moduloAtivo } from "@/lib/empresas/modulos";
 
 // Provisório (até a T43): sem login, a sessão é sempre da primeira empresa da semente.
@@ -48,4 +59,39 @@ export async function exigirModulo(modulo: Modulo): Promise<Empresa> {
 export async function repositorio(): Promise<RepositorioIndicacao> {
   const empresa = await empresaDaSessao();
   return criarRepositorioEmMemoria(banco(), empresa.id);
+}
+
+/** Dados da fidelidade, presos à empresa da sessão (RE3). */
+export async function repositorioFidelidade(): Promise<RepositorioFidelidade> {
+  const empresa = await empresaDaSessao();
+  return criarRepositorioFidelidadeEmMemoria(banco(), empresa.id);
+}
+
+/** Monta o endereço completo do cartão a partir da chave (RF8). */
+export async function montarLinkDoCartao(): Promise<(chave: string) => string> {
+  const h = await headers();
+  const endereco = enderecoDoSite({
+    appUrl: process.env.APP_URL,
+    host: h.get("x-forwarded-host") ?? h.get("host"),
+    protocolo: h.get("x-forwarded-proto"),
+  });
+  return (chave) => linkDoCartao(endereco, chave);
+}
+
+/** O que a confirmação de venda precisa para dar o carimbo; `null` com a fidelidade desligada. */
+export async function fidelidadeNaVenda(): Promise<FidelidadeNaVenda | null> {
+  const empresa = await empresaDaSessao();
+  if (!moduloAtivo(empresa, "fidelidade")) return null;
+  return {
+    repo: await repositorioFidelidade(),
+    empresaNome: empresa.nome,
+    link: await montarLinkDoCartao(),
+    gerarChave: gerarChaveCartao,
+  };
+}
+
+/** Página do cliente, sem sessão: só o que a RF9 deixa (faz o papel da RPC `cartao_publico`). */
+export async function cartaoPublico(chave: string): Promise<CartaoPublicoDados | null> {
+  await connection();
+  return lerCartaoPublico(banco(), chave);
 }
