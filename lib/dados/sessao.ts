@@ -13,6 +13,11 @@ function banco(): Banco {
   return global.__bancoKero;
 }
 
+/** Volta os dados à semente (só para a página /teste). */
+export function reiniciarBancoMock() {
+  global.__bancoKero = criarSemente(new Date());
+}
+
 /** Empresa da sessão (nome no cabeçalho, módulos ativos). */
 export async function empresaDaSessao(): Promise<Empresa> {
   // Os dados mudam a cada requisição: nada disso entra no pré-render.

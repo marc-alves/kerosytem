@@ -8,7 +8,7 @@ import { Aviso } from "@/components/aviso";
 import { Botao } from "@/components/botao";
 import { Cabecalho } from "@/components/cabecalho";
 import { Campo } from "@/components/campo";
-import { descreverCodigo } from "@/components/cartao-venda";
+import { descreverCodigo } from "@/lib/formato/codigo";
 import { ERRO_AO_SALVAR } from "@/components/mensagens";
 import type { PreviaVenda } from "@/lib/casos-de-uso/vendas";
 import { lerReais } from "@/lib/formato/leitura";

@@ -9,16 +9,9 @@ import { DialogoConfirmacao } from "@/components/dialogo-confirmacao";
 import { ERRO_AO_SALVAR } from "@/components/mensagens";
 import { SeloStatus } from "@/components/selo-status";
 import type { VendaListada } from "@/lib/dados/tipos";
+import { descreverCodigo } from "@/lib/formato/codigo";
 import { formatarReais } from "@/lib/formato/numero";
 import { dataEmBrasilia, formatarData, formatarDataHora } from "@/lib/indicacao/periodo";
-
-/**
- * "camila5, de Camila" ou "Sem código" (spec 10.5, 10.7). A spec escreve "da Camila";
- * "de" serve para qualquer nome, sem supor se é ela ou ele.
- */
-export function descreverCodigo(codigo: { codigo: string; indicadorNome: string } | null): string {
-  return codigo ? `${codigo.codigo}, de ${codigo.indicadorNome}` : "Sem código";
-}
 
 /**
  * Venda com **Confirmar recebimento** (só aguardando) e **Cancelar venda** (não nas canceladas),
