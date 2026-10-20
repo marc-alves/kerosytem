@@ -11,7 +11,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F3. `ganhaCarimbo` (RF3) e `dataLiberacao` (RF4): só venda confirmada, lançada depois da criação do programa, com valor final ≥ valor mínimo; com e sem código; liberação às 00h00 de Brasília do dia da confirmação + prazo, ou na hora com prazo 0 (inclusive confirmação às 23h30 de Brasília)
 - [x] F4. `estadoCartao` (RF4, RF6): carimbos no cartão, liberados, a liberar, exibido (0 à meta), completo, sobra, faltam, pode resgatar e data do prêmio liberado; casos da seção 12 (9→10 de 10, completo a liberar, 12 de 10 com 9 liberados, meta ajustada de 10 para 8) (depende de F3)
 - [x] F5. `escolherCarimbosDoResgate` (os liberados mais antigos), `podeDesfazerResgate` e `podeCancelarPorFidelidade` (RF5, RF6, RF7), com as mensagens da spec 10.2 e 10.3 (depende de F4)
-- [ ] F6. `primeiroNome` e as quatro mensagens da seção 8, mais `escolherMensagem`; exemplo da seção 8 exatamente igual (depende de F4)
+- [x] F6. `primeiroNome` e as quatro mensagens da seção 8, mais `escolherMensagem`; exemplo da seção 8 exatamente igual (depende de F4)
 - [ ] F7. `ordenarCartoes` (spec 10.1) e `historicoPublico` (spec 11.1: sem retirados, sem desfeitos, sem valores) (depende de F4)
 
 ## Fase 2 — Módulos independentes (base, spec 000 RE5 e RE7)
