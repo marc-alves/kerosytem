@@ -60,7 +60,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [x] T33. **Desfazer esta venda** na tela de sucesso (**spec 10.6**): cancela a venda pendente recém-lançada, com diálogo; depois, selo "Cancelada" e o link some; checklist (depende de T15, T20)
 - [x] T21. Detalhe do indicador (**spec 10.3**): resumo, códigos com tipo, desconto, validade, usos e aviso de limite com **Criar novo código**; vendas ("Aguardando pagamento" e "Pago") com **Confirmar recebimento** e as recusas da spec 10.8; **sem seção de pagamentos**; checklist (depende de T15, T39, T31)
 - [x] T22. Lista de vendas (**spec 10.7**): filtros de indicador, período (Hoje, Últimos 7 dias, Últimos 30 dias, Tudo) e situação na URL, cartões e **Confirmar recebimento** nas que aguardam pagamento; vazio com **Nova venda**; checklist (depende de T15, T39, T31)
-- [ ] T34. Cancelar venda (detalhe do indicador e lista de vendas, **spec 10.8**): diálogo de perigo "Cancelar esta venda de R$ 104,50 de João?" (com "Ela deixa de contar como uso do código." se estiver paga); sem bloqueio por saldo; checklist (depende de T15, T21, T22)
+- [x] T34. Cancelar venda (detalhe do indicador e lista de vendas, **spec 10.8**): diálogo de perigo "Cancelar esta venda de R$ 104,50 de João?" (com "Ela deixa de contar como uso do código." se estiver paga); sem bloqueio por saldo; checklist (depende de T15, T21, T22)
 - [ ] ~~T35. Cancelar pagamento ao indicador~~ — **cancelada**: não há pagamento ao indicador no sistema.
 
 ## Fase 6 — Fechamento
