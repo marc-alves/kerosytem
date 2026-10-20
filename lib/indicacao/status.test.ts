@@ -8,11 +8,7 @@ const primeiraamanda = {
   indicadorId: "amanda",
   indicadorNome: "Amanda",
 };
-const pendente = (codigo: VendaParaTransicao["codigo"], comissao = 314): VendaParaTransicao => ({
-  status: "pendente",
-  comissao,
-  codigo,
-});
+const pendente = (codigo: VendaParaTransicao["codigo"]): VendaParaTransicao => ({ status: "pendente", codigo });
 const semVinculo = { vinculo: null, temVendaConfirmada: false };
 const vinculadoCamila = { vinculo: { indicadorId: "camila", indicadorNome: "Camila" }, temVendaConfirmada: true };
 
@@ -29,7 +25,7 @@ describe("podeConfirmar (RN10, RN6, RN5)", () => {
   });
 
   it("venda sem código confirma sem vínculo", () => {
-    expect(podeConfirmar({ venda: pendente(null, 0), cliente: semVinculo })).toEqual({ ok: true, criarVinculo: false });
+    expect(podeConfirmar({ venda: pendente(null), cliente: semVinculo })).toEqual({ ok: true, criarVinculo: false });
   });
 
   it("Primeira compra válida: ao confirmar, vincula à Amanda", () => {
@@ -82,33 +78,17 @@ describe("podeConfirmar (RN10, RN6, RN5)", () => {
 });
 
 describe("podeCancelarVenda (RN12)", () => {
-  const confirmada: VendaParaTransicao = { ...pendente(camila5), status: "confirmada" };
-
-  it("Cancelar venda pendente: livre, mesmo com saldo zero", () => {
-    expect(podeCancelarVenda({ venda: pendente(camila5), saldo: 0 })).toEqual({ ok: true });
+  it("Cancelar venda pendente: livre", () => {
+    expect(podeCancelarVenda(pendente(camila5))).toEqual({ ok: true });
   });
 
-  it("cancelar confirmada com saldo suficiente estorna a comissão", () => {
-    expect(podeCancelarVenda({ venda: confirmada, saldo: 314 })).toEqual({ ok: true });
-  });
-
-  it("Cancelar confirmada com saldo já pago: bloqueado", () => {
-    expect(podeCancelarVenda({ venda: confirmada, saldo: 0 })).toEqual({
-      ok: false,
-      motivo: "saldo_ficaria_negativo",
-      mensagem:
-        "Não dá para cancelar: a comissão de R$ 3,14 já foi paga a Camila. Cancele antes o pagamento feito a Camila.",
-    });
-  });
-
-  it("venda confirmada sem código cancela livre", () => {
-    expect(podeCancelarVenda({ venda: { status: "confirmada", comissao: 0, codigo: null }, saldo: 0 })).toEqual({
-      ok: true,
-    });
+  it("Cancelar venda confirmada: livre, sem bloqueio", () => {
+    expect(podeCancelarVenda({ ...pendente(camila5), status: "confirmada" })).toEqual({ ok: true });
+    expect(podeCancelarVenda({ status: "confirmada" })).toEqual({ ok: true });
   });
 
   it("venda já cancelada não cancela de novo", () => {
-    expect(podeCancelarVenda({ venda: { ...confirmada, status: "cancelada" }, saldo: 1000 })).toEqual({
+    expect(podeCancelarVenda({ ...pendente(camila5), status: "cancelada" })).toEqual({
       ok: false,
       motivo: "venda_ja_cancelada",
       mensagem: "Esta venda já foi cancelada.",

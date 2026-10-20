@@ -1,14 +1,14 @@
-# DESIGN.md — Kerosystem
+# DESIGN.md — Kero System
 
-Diretrizes de aparência e experiência (UI/UX) do app da **Kero Salgados**. Vale para todas as funcionalidades (indicação, fidelidade etc.).
+Diretrizes de aparência e experiência (UI/UX) do **Kero System**, app usado por várias empresas (ver `specs/000-empresas/`). Vale para todos os módulos (indicação, fidelidade etc.) e para o cadastro de empresa.
 
 **Como usar:** ao criar ou alterar qualquer tela, siga este arquivo. O **comportamento** de cada tela está na `spec.md` da funcionalidade; aqui está **como ela parece e se comporta visualmente**. Em conflito sobre comportamento, a spec vence. Os valores reais (cores, tamanhos, espaçamentos) ficam nos tokens do código (ex.: config do Tailwind); este arquivo descreve a intenção.
 
-> A paleta parte da identidade da Kero no Instagram (creme, laranja e marrom), com cores amostradas do perfil. Se houver o arquivo oficial do logo ou um manual de marca, confirme os valores e ajuste os tokens e a seção 4.
+> A paleta abaixo (creme, laranja e marrom) é a do **Kero System** (decidido em 2026-10-20). Quando houver logo oficial ou manual de marca, confirme os valores e ajuste os tokens e a seção 4. Não há cores nem logo por empresa no MVP.
 
 ## 1. Contexto de uso
 
-O app é usado **somente no celular**, por uma pessoa idosa ou pouco habituada a aplicativos, geralmente em pé, atendendo cliente, às vezes com a mão ocupada ou suja e com a vista cansada. Ela **não pode precisar de treinamento nem de ajuda**. Trate essa usuária como o caso padrão, não como exceção. Prioridade absoluta: **lançar uma venda rápido, sem errar**.
+O app é usado **somente no celular**, pelo responsável de um pequeno negócio. Projete para o caso mais difícil: uma pessoa idosa ou pouco habituada a aplicativos, geralmente em pé, atendendo cliente, às vezes com a mão ocupada ou suja e com a vista cansada. Ela **não pode precisar de treinamento nem de ajuda**. Trate essa usuária como o caso padrão, não como exceção. Prioridade absoluta: **lançar uma venda rápido, sem errar**.
 
 ## 2. Princípios
 
@@ -29,9 +29,9 @@ O app é usado **somente no celular**, por uma pessoa idosa ou pouco habituada a
 
 ## 4. Marca e cores
 
-Tema **claro** apenas no MVP. Visual da Kero: fundo creme, laranja e marrom, tom quente de comida, sem exagero.
+Tema **claro** apenas no MVP. Visual do Kero System: fundo creme, laranja e marrom, tom quente, sem exagero.
 
-**Logo:** usar o arquivo original (guardar em `public/`), sem recriar nem distorcer. No app, só no login e no cabeçalho, em tamanho pequeno. O rosa do chapéu de chef pode aparecer como acento pontual, usando a cor exata do logo; não é cor de interface.
+**Logo:** o logo do **Kero System**, do arquivo original (guardar em `public/`), sem recriar nem distorcer. Aparece no login, no cadastro e, pequeno, no cabeçalho. O cabeçalho também mostra o **nome da empresa logada**, em texto (spec 000, RE6). Nenhuma tela mostra o nome ou o logo de uma empresa cliente fixo no código.
 
 | Token | Valor | Uso |
 |---|---|---|
@@ -86,13 +86,13 @@ Todos os pares de texto acima passam no contraste AA (mínimo 4,5:1). Ao trocar 
 
 **Lançar venda.** Formulário curto com **três campos em ordem**: telefone do cliente, código (opcional) e valor. O nome do cliente só aparece se ele for novo. Em seguida, uma tela de **conferência** com um único botão grande "Lançar venda". O campo de código aceita maiúscula, minúscula e espaços sem reclamar. O campo de valor aceita "110" e mostra "R$ 110,00".
 
-**Prévia da venda.** Valor original riscado, valor final em destaque e o desconto aplicado, tudo em letras grandes para conferir antes de lançar. **Não** exibir a comissão do indicador (ela só aparece no detalhe do indicador). Avisos relevantes (limite de usos, cliente com venda pendente) aparecem logo abaixo, antes do botão.
+**Prévia da venda.** Valor original riscado, valor final em destaque e o desconto aplicado, tudo em letras grandes para conferir antes de lançar. Avisos relevantes (limite de usos, cliente com venda pendente) aparecem logo abaixo, antes do botão.
 
 **Mensagem pronta.** Cartão com o texto exatamente como será enviado e um botão grande **"Copiar mensagem"**. Ao tocar, o próprio botão muda para **"✓ Copiado"** e **permanece assim** enquanto a pessoa estiver na tela (sem aviso que some). Na mesma tela, ficam visíveis o botão "Nova venda" e um link claro **"Desfazer esta venda"** para corrigir um engano.
 
 **Confirmar recebimento.** Diálogo com o resumo: "Confirmar recebimento de R$ 104,50 de João?". Botões: "Sim, confirmar recebimento" e "Não, voltar". Depois, o selo muda para "Pago".
 
-**Cancelar.** Em estilo de perigo, com a consequência escrita: "Cancelar esta venda? A comissão de R$ 3,14 sai do saldo da Camila." Se o sistema bloquear o cancelamento, explicar o motivo em português simples e o que fazer.
+**Cancelar.** Em estilo de perigo, com a consequência escrita: "Cancelar esta venda de R$ 104,50 de João? Ela deixa de contar como uso do código." Se o sistema recusar alguma ação, explicar o motivo em português simples e o que fazer.
 
 **Formulários.** Validar ao sair do campo e ao enviar; erro ao lado do campo, dizendo o que corrigir ("O telefone precisa ter DDD"). Manter o que a pessoa já digitou quando houver erro. Nunca apagar o formulário por causa de um erro.
 
@@ -114,7 +114,6 @@ Todos os pares de texto acima passam no contraste AA (mínimo 4,5:1). Ao trocar 
   - **Confirmar recebimento**: o cliente pagou a compra.
   - **Aguardando pagamento**: venda lançada ainda não paga (`pendente`).
   - **Pago**: venda com recebimento confirmado (`confirmada`).
-  - **Pagamento ao indicador**: o que a Shirley paga ao indicador. Nunca chamar isso só de "pagamento".
   - **Indicador**, **cliente**, **código**.
 
 ## 11. Acessibilidade
@@ -141,4 +140,4 @@ Tema escuro, ilustrações elaboradas, animações decorativas, personalização
 - [ ] Status com ícone + texto, com os rótulos da seção 10
 - [ ] Ações de dinheiro têm diálogo de confirmação com botões escritos por extenso
 - [ ] Existe caminho visível para desfazer ou voltar
-- [ ] **Teste de uso:** a Shirley consegue fazer a tarefa da tela sozinha, sem explicação
+- [ ] **Teste de uso:** o responsável de uma empresa piloto consegue fazer a tarefa da tela sozinho(a), sem explicação

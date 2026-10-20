@@ -3,7 +3,7 @@ import { calcularVenda } from "@/lib/indicacao/venda";
 
 describe("gerarMensagem (seção 8)", () => {
   it("exemplo da spec: João, camila5, 5%, R$ 110,00", () => {
-    const { valorOriginal, valorFinal } = calcularVenda({ valorOriginal: 11000, descontoBp: 500, comissaoBp: 300 });
+    const { valorOriginal, valorFinal } = calcularVenda({ valorOriginal: 11000, descontoBp: 500 });
     expect(gerarMensagem({ nome: "João", descontoBp: 500, codigo: "camila5", valorOriginal, valorFinal })).toBe(
       "*João*, você ganhou 5% de desconto com o código camila5!\n~R$ 110,00~ por *R$ 104,50*",
     );

@@ -56,7 +56,6 @@ describe("validarCodigo — código (RN2, RN3)", () => {
     indicadorTelefone: "5561988887777",
     tipo: "normal",
     descontoBp: 500,
-    comissaoBp: 300,
     validoAte: null,
     ativo: true,
     limiteUsos: 10,
@@ -137,7 +136,6 @@ describe("validarCodigo — cliente (RN5, RN6, RN7)", () => {
     indicadorTelefone: "5561988887777",
     tipo: "normal",
     descontoBp: 500,
-    comissaoBp: 300,
   };
   const primeiraamanda: CodigoParaValidar = {
     ...base,
@@ -147,7 +145,6 @@ describe("validarCodigo — cliente (RN5, RN6, RN7)", () => {
     indicadorTelefone: "5561977776666",
     tipo: "primeira_compra",
     descontoBp: 1000,
-    comissaoBp: 500,
   };
   const novo: ClienteParaValidar = {
     telefone: "5561999999999",

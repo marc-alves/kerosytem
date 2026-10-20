@@ -27,8 +27,6 @@ export type CalculoVenda = {
   descontoBp: PontosBase;
   valorDesconto: Centavos;
   valorFinal: Centavos;
-  comissaoBp: PontosBase;
-  comissao: Centavos;
 };
 
 /** Data no formato do Postgres `date` (`AAAA-MM-DD`). */
@@ -47,7 +45,6 @@ export type CodigoParaValidar = {
   indicadorTelefone: Telefone;
   tipo: TipoCodigo;
   descontoBp: PontosBase;
-  comissaoBp: PontosBase;
   /** Último dia em que vale, até 23h59 de Brasília; `null` = sem validade (RN2). */
   validoAte: Data | null;
   ativo: boolean;
@@ -82,21 +79,9 @@ export type ResultadoCodigo =
       | "primeira_compra_ja_feita"
     >;
 
-export type StatusPagamento = "ativo" | "cancelado";
-
-export type Saldo = {
-  /** Comissões de vendas confirmadas menos pagamentos ativos (RN11). */
-  saldo: Centavos;
-  /** Comissões de vendas pendentes; não entram no saldo. */
-  aConfirmar: Centavos;
-};
-
-export type ResultadoPagamento = { ok: true } | Falha<"valor_invalido" | "acima_do_saldo">;
-
 /** Venda já gravada, com o código e o indicador dela (`null` em venda sem código, RN9). */
 export type VendaParaTransicao = {
   status: StatusVenda;
-  comissao: Centavos;
   codigo: { codigo: string; tipo: TipoCodigo; indicadorId: string; indicadorNome: string } | null;
 };
 
@@ -108,4 +93,4 @@ export type ResultadoConfirmacao =
     }
   | Falha<"venda_nao_pendente" | "cliente_de_outro_indicador" | "primeira_compra_ja_feita">;
 
-export type ResultadoCancelamento = { ok: true } | Falha<"venda_ja_cancelada" | "saldo_ficaria_negativo">;
+export type ResultadoCancelamento = { ok: true } | Falha<"venda_ja_cancelada">;

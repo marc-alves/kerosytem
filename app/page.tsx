@@ -1,8 +1,6 @@
-// Página provisória: a navegação e as telas chegam nas T31 e T19.
+import { redirect } from "next/navigation";
+
+// A ação mais usada é lançar venda (DESIGN.md seção 1).
 export default function Inicio() {
-  return (
-    <main className="mx-auto w-full max-w-app flex-1 px-4 py-6">
-      <h1 className="text-titulo font-semibold">Kero Salgados</h1>
-    </main>
-  );
+  redirect("/vendas/nova");
 }

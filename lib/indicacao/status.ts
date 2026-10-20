@@ -1,6 +1,4 @@
-import { formatarReais } from "@/lib/formato/numero";
 import type {
-  Centavos,
   ClienteParaValidar,
   ResultadoCancelamento,
   ResultadoConfirmacao,
@@ -51,28 +49,10 @@ export function podeConfirmar(entrada: {
   return { ok: true, criarVinculo: cliente.vinculo === null };
 }
 
-/**
- * RN12: venda pendente cancela livre; confirmada estorna a comissão,
- * bloqueada se o saldo atual do indicador ficaria negativo.
- */
-export function podeCancelarVenda(entrada: {
-  venda: VendaParaTransicao;
-  saldo: Centavos;
-}): ResultadoCancelamento {
-  const { venda, saldo } = entrada;
-
+/** RN12: cancelar venda pendente ou confirmada é livre; só não cancela duas vezes. */
+export function podeCancelarVenda(venda: Pick<VendaParaTransicao, "status">): ResultadoCancelamento {
   if (venda.status === "cancelada") {
     return { ok: false, motivo: "venda_ja_cancelada", mensagem: "Esta venda já foi cancelada." };
   }
-
-  if (venda.status === "confirmada" && venda.codigo !== null && saldo - venda.comissao < 0) {
-    const nome = venda.codigo.indicadorNome;
-    return {
-      ok: false,
-      motivo: "saldo_ficaria_negativo",
-      mensagem: `Não dá para cancelar: a comissão de ${formatarReais(venda.comissao)} já foi paga a ${nome}. Cancele antes o pagamento feito a ${nome}.`,
-    };
-  }
-
   return { ok: true };
 }
