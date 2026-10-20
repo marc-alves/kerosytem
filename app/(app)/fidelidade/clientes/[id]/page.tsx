@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { acaoDesfazerResgate, acaoGerarNovoLink, acaoRegistrarResgate } from "@/app/(app)/fidelidade/acoes";
 import { AcaoComDialogo } from "@/components/acao-com-dialogo";
 import { Aviso } from "@/components/aviso";
@@ -5,7 +6,7 @@ import { BotaoCopiar } from "@/components/botao-copiar";
 import { Cabecalho } from "@/components/cabecalho";
 import { Cartao } from "@/components/cartao";
 import { CartaoCarimbos } from "@/components/cartao-carimbos";
-import { Vazio } from "@/components/estados";
+import { Carregando, Vazio } from "@/components/estados";
 import { verCartaoCliente, type ItemHistorico } from "@/lib/casos-de-uso/fidelidade";
 import { empresaDaSessao, montarLinkDoCartao, repositorioFidelidade } from "@/lib/dados/sessao";
 import { formatarReais } from "@/lib/formato/numero";
@@ -55,8 +56,7 @@ function LinhaHistorico({ item, clienteId, nome }: { item: ItemHistorico; client
   );
 }
 
-/** Spec 10.2. */
-export default async function PaginaCartaoCliente({ params, searchParams }: PageProps<"/fidelidade/clientes/[id]">) {
+async function CartaoCliente({ params, searchParams }: PageProps<"/fidelidade/clientes/[id]">) {
   const { id } = await params;
   const { entregue } = await searchParams;
   const empresa = await empresaDaSessao();
@@ -164,5 +164,21 @@ export default async function PaginaCartaoCliente({ params, searchParams }: Page
         </div>
       </div>
     </>
+  );
+}
+
+/** Spec 10.2. */
+export default function PaginaCartaoCliente(props: PageProps<"/fidelidade/clientes/[id]">) {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <Cabecalho titulo="Cartão" voltarPara="/fidelidade" />
+          <Carregando />
+        </>
+      }
+    >
+      <CartaoCliente {...props} />
+    </Suspense>
   );
 }

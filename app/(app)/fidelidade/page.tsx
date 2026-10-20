@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { FormularioPrograma } from "@/app/(app)/fidelidade/formulario-programa";
 import { Aviso } from "@/components/aviso";
 import { Botao } from "@/components/botao";
 import { Cabecalho } from "@/components/cabecalho";
-import { Vazio } from "@/components/estados";
+import { Carregando, Vazio } from "@/components/estados";
 import { SeloCartaoCompleto } from "@/components/selo-status";
 import { listarCartoes } from "@/lib/casos-de-uso/fidelidade";
 import { repositorioFidelidade } from "@/lib/dados/sessao";
@@ -35,8 +36,7 @@ function Progresso({ estado }: { estado: EstadoCartao }) {
   );
 }
 
-/** Spec 10.1. */
-export default async function PaginaFidelidade({ searchParams }: PageProps<"/fidelidade">) {
+async function Fidelidade({ searchParams }: { searchParams: PageProps<"/fidelidade">["searchParams"] }) {
   const { salvo, busca } = await searchParams;
   const textoBusca = typeof busca === "string" ? busca : "";
   const { programa, total, cartoes } = await listarCartoes(await repositorioFidelidade(), textoBusca, new Date());
@@ -127,5 +127,14 @@ export default async function PaginaFidelidade({ searchParams }: PageProps<"/fid
         )}
       </div>
     </>
+  );
+}
+
+/** Spec 10.1. */
+export default function PaginaFidelidade({ searchParams }: PageProps<"/fidelidade">) {
+  return (
+    <Suspense fallback={<Carregando />}>
+      <Fidelidade searchParams={searchParams} />
+    </Suspense>
   );
 }
