@@ -41,7 +41,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [ ] T15. `confirmarRecebimento` (revalida o vínculo e a primeira compra; cria o vínculo na primeira confirmação; grava `confirmada_em`) e `cancelarVenda` (livre para pendente e confirmada; recusa só venda já cancelada; grava `cancelada_em`) (depende de T14, T37)
 - [ ] ~~T16. `registrarPagamentoIndicador` e `cancelarPagamento`~~ — **cancelada**: não há pagamento ao indicador no sistema.
 - [x] T39. Consultas de leitura em `lib/dados/` (todas restritas à empresa da sessão pela RLS): buscar cliente por telefone; lista de indicadores com resumo; detalhe do indicador (códigos com usos, vendas pendentes e confirmadas); venda por id (tela de sucesso); vendas com filtros de indicador, período (Hoje, 7 dias, 30 dias, Tudo, em horário de Brasília) e situação (depende de T11)
-- [ ] T40. Actions `cadastrarIndicador` (telefone normalizado e único na empresa), `criarCodigo` (código normalizado e único na empresa, desconto 0–100%, data de hoje em diante, limite ≥ 1) e `definirCodigoAtivo`, com as mensagens da spec 10.2 e 10.4 (depende de T11, T38)
+- [x] T40. Actions `cadastrarIndicador` (telefone normalizado e único na empresa), `criarCodigo` (código normalizado e único na empresa, desconto 0–100%, data de hoje em diante, limite ≥ 1) e `definirCodigoAtivo`, com as mensagens da spec 10.2 e 10.4 (depende de T11, T38)
 
 ## Fase 4 — Base visual (`DESIGN.md`)
 - [x] T27. Tema: tokens de cor, tamanhos e espaçamentos do `DESIGN.md` no `@theme` de `app/globals.css`; **remover o modo escuro**; `lang="pt-BR"` e título do app no `layout.tsx`; fonte única (`system-ui` ou `next/font`) com texto base 18px em `rem`; remover a página de exemplo do template
