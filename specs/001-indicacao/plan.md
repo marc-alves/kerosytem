@@ -1,6 +1,6 @@
 # Plano técnico — 001 Indicação
 
-> Referência: `spec.md` nesta pasta é a fonte de verdade das regras; `DESIGN.md` nesta pasta define a aparência das telas. Este plano só decide **como** implementar. Atualizado em 2026-10-20 para a spec revisada (sem comissão nem pagamento ao indicador; telas detalhadas na seção 10 da spec) e para o **Kero System com várias empresas**: empresas, cadastro, RLS por empresa e módulos estão em `specs/000-empresas/plan.md`.
+> Referência: `spec.md` nesta pasta é a fonte de verdade das regras; `specs/design/DESIGN.md` define a aparência das telas. Este plano só decide **como** implementar. Atualizado em 2026-10-20 para a spec revisada (sem comissão nem pagamento ao indicador; telas detalhadas na seção 10 da spec) e para o **Kero System com várias empresas**: empresas, cadastro, RLS por empresa e módulos estão em `specs/000-empresas/plan.md`.
 
 ## Stack
 

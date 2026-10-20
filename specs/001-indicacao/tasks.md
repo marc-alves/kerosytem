@@ -1,6 +1,6 @@
 # Tarefas — 001 Indicação
 
-Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indica a ordem mínima. As referências RN e seções apontam para `spec.md`; "checklist" é a seção 13 do `DESIGN.md` desta pasta. Tarefas acrescentadas depois da primeira versão começam em T26, para não renumerar as existentes.
+Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indica a ordem mínima. As referências RN e seções apontam para `spec.md`; "checklist" é a seção 13 do `specs/design/DESIGN.md`. Tarefas acrescentadas depois da primeira versão começam em T26, para não renumerar as existentes.
 
 **Revisão de 2026-10-20:** comissão e pagamento ao indicador saíram do sistema (spec, seção 5 e RN11 removida). Tarefas canceladas ficam riscadas; o código já feito com comissão/saldo é ajustado nas T36 e T37.
 

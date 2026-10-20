@@ -16,7 +16,7 @@ App web para pequenos negócios: **qualquer empresa** cria sua conta e usa os m�
 
 - **As regras de negócio vivem em `specs/<funcionalidade>/spec.md`.** Leia a spec antes de implementar e não invente escopo.
 - Ordem de trabalho: `spec.md` → `plan.md` → `tasks.md`. Execute uma tarefa por vez e marque `[x]` em `tasks.md`.
-- **Telas seguem o `specs/001-indicacao/DESIGN.md`**: aparência, textos, componentes e o checklist da seção 13 antes de dar uma tela como pronta. Em conflito sobre comportamento, a spec vence.
+- **Telas seguem o `specs/design/DESIGN.md`**: aparência, textos, componentes e o checklist da seção 13 antes de dar uma tela como pronta. Em conflito sobre comportamento, a spec vence.
 - Se a spec for ambígua ou tiver item **[a confirmar]**, pergunte em vez de assumir.
 - Base: `specs/000-empresas/` (cadastro de empresa, isolamento por `empresa_id` + RLS, módulos). Toda tabela e consulta de módulo é por empresa.
 - Módulo atual: `specs/001-indicacao/`. O cartão fidelidade (`002-fidelidade`) é futuro, não implementar.

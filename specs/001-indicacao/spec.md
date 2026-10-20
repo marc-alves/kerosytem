@@ -122,7 +122,7 @@ Valores em formato brasileiro (`R$ 1.234,56`) com **espaço comum** (não usar e
 
 ## 10. Telas do MVP
 
-Regras comuns a todas as telas (detalhes visuais no `DESIGN.md` desta pasta):
+Regras comuns a todas as telas (detalhes visuais no `specs/design/DESIGN.md`):
 
 - Cabeçalho com o nome da empresa logada (spec 000, RE6).
 - Navegação inferior fixa com **Nova venda** (em destaque), **Vendas** e **Indicadores** (destinos do módulo Indicação, mostrados porque ele está ativo; spec 000, RE5). Telas fora desses três destinos têm o botão **Voltar** escrito.

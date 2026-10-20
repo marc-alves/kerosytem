@@ -35,7 +35,7 @@ Hoje o sistema pressupõe um único negócio e um único usuário, criado à mã
 - Isolamento total dos dados por empresa.
 - Catálogo fixo de módulos, com o módulo **Indicação** ativado automaticamente para toda empresa nova.
 - Nome da empresa exibido no cabeçalho do app.
-- Marca do produto: **Kero System** (nome e logo próprios; cores atuais do `001-indicacao/DESIGN.md`).
+- Marca do produto: **Kero System** (nome e logo próprios; cores atuais do `specs/design/DESIGN.md`).
 
 ### Fora do MVP (não implementar)
 - Vários usuários por empresa, convites e permissões.
@@ -77,7 +77,7 @@ Hoje o sistema pressupõe um único negócio e um único usuário, criado à mã
 
 ## 9. Telas do MVP
 
-Regras comuns: as mesmas da spec 001, seção 10 (estados, erros embaixo do campo, nada mostrado como salvo antes de o servidor confirmar) e o `001-indicacao/DESIGN.md`.
+Regras comuns: as mesmas da spec 001, seção 10 (estados, erros embaixo do campo, nada mostrado como salvo antes de o servidor confirmar) e o `specs/design/DESIGN.md`.
 
 ### 9.1 Criar conta da empresa
 
