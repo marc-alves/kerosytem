@@ -19,6 +19,16 @@ export function diasAntes(data: Data, dias: number): Data {
   return new Date(Date.UTC(ano, mes - 1, dia - dias)).toISOString().slice(0, 10);
 }
 
+/** `AAAA-MM-DD` mais `dias` dias corridos. */
+export function diasDepois(data: Data, dias: number): Data {
+  return diasAntes(data, -dias);
+}
+
+/** 00h00 de um dia em Brasília (sem horário de verão desde 2019: UTC−3). */
+export function inicioDoDiaEmBrasilia(data: Data): Date {
+  return new Date(`${data}T00:00:00-03:00`);
+}
+
 /** "2026-12-31" → "31/12/2026". */
 export function formatarData(data: Data): string {
   const [ano, mes, dia] = data.split("-");
