@@ -8,7 +8,7 @@ Tarefas com prefixo **E** para não confundir com as `T` da `001-indicacao`. As 
 - [ ] E3. Logo e ícone do **Kero System**: arquivo oficial em `public/` e `app/favicon.ico` trocado (você fornece o arquivo; não recriar). Substitui a T28 da 001 (depende de E1)
 
 ## Fase 1 — Regras puras
-- [ ] E4. `lib/empresas/`: `validarNomeEmpresa`, `validarEmail` e `validarSenha`, com testes e as mensagens da spec 9.1 (RE1)
+- [x] E4. `lib/empresas/`: `validarNomeEmpresa`, `validarEmail` e `validarSenha`, com testes e as mensagens da spec 9.1 (RE1)
 
 ## Fase 2 — Banco
 - [ ] E5. Migration: `empresas`, `empresa_usuarios` (`user_id` único), `empresa_modulos`; função `empresa_atual()`; RLS dessas tabelas (só leitura da própria empresa) (depende de T9)
