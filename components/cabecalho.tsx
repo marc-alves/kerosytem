@@ -23,8 +23,8 @@ export function Cabecalho({ titulo, voltarPara }: { titulo: string; voltarPara?:
         ) : (
           <span />
         )}
-        {/* Logo pequeno: entra na T28, com o arquivo oficial. */}
-        <span className="text-pequeno font-bold text-texto-suave">Kero Salgados</span>
+        {/* Logo pequeno: entra na E3, com o arquivo oficial; o nome da empresa entra na E9. */}
+        <span className="text-pequeno font-bold text-texto-suave">Kero System</span>
       </div>
       <h1 className="text-titulo font-semibold">{titulo}</h1>
     </header>

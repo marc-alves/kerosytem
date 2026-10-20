@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kero Salgados",
-  description: "Indicações da Kero Salgados",
+  title: "Kero System",
+  description: "Indicações, vendas e clientes do seu negócio",
 };
 
 export const viewport: Viewport = {
