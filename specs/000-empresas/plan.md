@@ -30,7 +30,7 @@ A mesma da `001-indicacao/plan.md`: Next.js 16 (App Router) + TypeScript, Supaba
 - Server Action `criarConta({ nomeEmpresa, email, senha })`:
   1. valida com funções puras de `lib/empresas/` (nome, e-mail, senha; RE1);
   2. cria o usuário pelo `auth.signUp`, sem confirmação de e-mail (RE2), já com sessão aberta;
-  3. chama a RPC `criar_empresa(nome)`, que, em uma transação, cria `empresas`, `empresa_usuarios` (com o `auth.uid()`) e `empresa_modulos` com `indicacao` ativo. Recusa se o usuário já tem empresa.
+  3. chama a RPC `criar_empresa(nome)`, que, em uma transação, cria `empresas`, `empresa_usuarios` (com o `auth.uid()`) e `empresa_modulos` com **todos os módulos do catálogo** ativos (RE5). Recusa se o usuário já tem empresa.
 - Se o passo 3 falhar, a action apaga o usuário recém-criado (cliente admin, só no servidor) para não sobrar usuário sem empresa. Alternativa a avaliar: gatilho em `auth.users` que cria a empresa a partir de `raw_user_meta_data`, tudo na mesma transação.
 - Usuário logado sem empresa (caso de falha antiga) é levado para uma tela de erro com "Tentar de novo", nunca para telas de módulo.
 

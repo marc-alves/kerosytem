@@ -1,10 +1,10 @@
 # Spec 000 — Empresas e módulos (base do Kero System)
 
-> Status: **aprovada para implementação** (criada e decidida em 2026-10-20). Qualquer mudança de regra deve ser feita aqui **antes** do código.
+> Status: **aprovada para implementação** (criada e decidida em 2026-10-20; revisada no mesmo dia com a spec 002: módulos independentes, todos ativos por padrão, vendas e clientes como base comum e cliente vendo o próprio cartão fidelidade). Qualquer mudança de regra deve ser feita aqui **antes** do código.
 
 ## 1. Contexto
 
-O **Kero System** é um app web para **pequenos negócios** (lanchonetes, salgaderias, lojas de bairro etc.). Cada negócio cria a **conta da sua empresa** e usa os **módulos** do sistema. O primeiro módulo é o de **Indicação** (`001-indicacao`); o cartão fidelidade (`002-fidelidade`) vem depois.
+O **Kero System** é um app web para **pequenos negócios** (lanchonetes, salgaderias, lojas de bairro etc.). Cada negócio cria a **conta da sua empresa** e usa os **módulos** do sistema. Os módulos são **Indicação** (`001-indicacao`) e **Cartão fidelidade** (`002-fidelidade`), independentes entre si.
 
 O app nasceu para um único negócio e agora passa a atender **qualquer empresa**. Nenhum nome de empresa cliente aparece no produto: a marca é sempre **Kero System**, e o nome de cada empresa vem do cadastro dela.
 
@@ -20,11 +20,12 @@ Hoje o sistema pressupõe um único negócio e um único usuário, criado à mã
 
 - **Usuário**: a pessoa responsável pela empresa (dono ou dona), operando pelo celular, com e-mail e senha (**Supabase Auth**).
 - **Um usuário por empresa no MVP.** Quem cria a conta é o responsável por ela. Convidar funcionários ou ter vários usuários por empresa fica para depois (seção 5).
-- Indicadores e clientes continuam **sem acesso** ao sistema.
+- Indicadores continuam **sem acesso** ao sistema.
+- Clientes não têm login. A única coisa que veem é o **próprio cartão fidelidade**, somente leitura, por um link pessoal (spec 002, RF8 e RF9).
 
 ## 4. Objetivo do MVP e critérios de sucesso
 
-- Uma empresa nova cria a conta sozinha, pelo celular, em **menos de 2 minutos**, e já cai na tela inicial do módulo de Indicação.
+- Uma empresa nova cria a conta sozinha, pelo celular, em **menos de 2 minutos**, e já cai em **Nova venda**.
 - Nenhum dado de uma empresa aparece para outra, em nenhuma tela ou consulta.
 
 ## 5. Escopo
@@ -33,14 +34,15 @@ Hoje o sistema pressupõe um único negócio e um único usuário, criado à mã
 - Cadastro público de empresa (nome da empresa + e-mail + senha), que cria a empresa e o usuário responsável juntos.
 - Login e sessão (detalhes da tela na spec 001, seção 10.1).
 - Isolamento total dos dados por empresa.
-- Catálogo fixo de módulos, com o módulo **Indicação** ativado automaticamente para toda empresa nova.
+- Catálogo fixo de módulos independentes, **todos ativados automaticamente** para toda empresa nova (fase de testes), com a base pronta para desligar um módulo por empresa.
+- Vendas e clientes como base comum a todos os módulos.
 - Nome da empresa exibido no cabeçalho do app.
 - Marca do produto: **Kero System** (nome e logo próprios; cores atuais do `specs/design/DESIGN.md`).
 
 ### Fora do MVP (não implementar)
 - Vários usuários por empresa, convites e permissões.
 - Um usuário em mais de uma empresa (troca de empresa).
-- Tela para ativar ou desativar módulos (decidido em 2026-10-20).
+- Tela para ativar ou desativar módulos (decidido em 2026-10-20; por enquanto, pelo painel do Supabase).
 - Editar os dados da empresa (nome etc.) (decidido em 2026-10-20; se precisar, corrigir pelo painel do Supabase).
 - "Esqueci a senha" (decidido em 2026-10-20).
 - Logo e cores personalizados por empresa.
@@ -64,16 +66,18 @@ Hoje o sistema pressupõe um único negócio e um único usuário, criado à mã
 
 **RE4 — Unicidade dentro da empresa.** Regras de "único" dos módulos valem **dentro de cada empresa**: duas empresas podem ter o mesmo código (`camila5`) ou o mesmo telefone de cliente ou de indicador, sem conflito.
 
-**RE5 — Módulos.** O sistema tem um catálogo fixo de módulos: `indicacao` (disponível) e `fidelidade` (futuro, não aparece). Toda empresa nova nasce com `indicacao` **ativo**. O app só mostra telas e destinos de navegação dos módulos ativos da empresa; abrir a rota de um módulo inativo leva à tela inicial.
+**RE5 — Módulos.** O sistema tem um catálogo fixo de módulos: `indicacao` e `fidelidade`. Cada módulo é **independente**: funciona com ou sem os outros, e é ligado ou desligado por empresa. Por enquanto, toda empresa nova nasce com **todos os módulos ativos** (decidido em 2026-10-20, enquanto só o dono do Kero System testa); no futuro, os módulos de cada empresa vão depender do plano dela (fora do MVP). Desligar um módulo é feito pelo admin do Kero System no painel do Supabase. O app só mostra telas, campos e destinos de navegação dos módulos ativos da empresa; abrir a rota de um módulo inativo leva à tela inicial. Desligar um módulo não apaga os dados dele: voltam se ele for religado.
 
 **RE6 — Nome no app.** O cabeçalho mostra o nome da empresa logada. O nome do produto (**Kero System**) aparece no login, no cadastro e no título da aba do navegador.
+
+**RE7 — Base comum: vendas e clientes.** Clientes, lançamento de venda, confirmação de recebimento e cancelamento (spec 001, RN4, RN8 a RN12 e telas 10.5 a 10.8) são **base comum**, usada por qualquer módulo: os destinos **Nova venda** e **Vendas** aparecem sempre que a empresa tem pelo menos um módulo ativo. O que é de cada módulo só aparece com ele ativo (ex.: o campo Código e a tela Indicadores só com Indicação; o carimbo só com Fidelidade). Empresa sem nenhum módulo ativo vê só a frase "Nenhum módulo ativo. Fale com o Kero System."
 
 ## 8. Fluxo principal
 
 **Criar conta**
 1. Na tela **Entrar**, a pessoa toca em **Criar conta da empresa**.
 2. Preenche nome da empresa, e-mail e senha e toca em **Criar conta**.
-3. O sistema cria a empresa, o usuário responsável e ativa o módulo Indicação (RE1, RE5), abre a sessão e leva para **Nova venda**.
+3. O sistema cria a empresa, o usuário responsável e ativa todos os módulos (RE1, RE5), abre a sessão e leva para **Nova venda**.
 
 ## 9. Telas do MVP
 
@@ -98,7 +102,7 @@ Regras comuns: as mesmas da spec 001, seção 10 (estados, erros embaixo do camp
 
 | Cenário | Entrada | Resultado esperado |
 |---|---|---|
-| Criar conta | "Lanchonete da Maria", e-mail novo, senha de 8+ caracteres | empresa e usuário criados; módulo Indicação ativo; sessão aberta em Nova venda |
+| Criar conta | "Lanchonete da Maria", e-mail novo, senha de 8+ caracteres | empresa e usuário criados; todos os módulos ativos; sessão aberta em Nova venda |
 | E-mail repetido | e-mail que já tem conta | recusado: "Este e-mail já tem conta. Toque em Entrar." |
 | Nome vazio | nome só com espaços | recusado: "Digite o nome da empresa." |
 | Senha curta | 7 caracteres | recusado com mensagem clara |
@@ -107,6 +111,8 @@ Regras comuns: as mesmas da spec 001, seção 10 (estados, erros embaixo do camp
 | Isolamento na gravação | empresa A tenta gravar com `empresa_id` da B | recusado pelo banco |
 | Mesmo código em empresas diferentes | A e B criam `camila5` | as duas conseguem |
 | Mesmo telefone em empresas diferentes | João é cliente de A e de B | dois clientes independentes, cada um na sua empresa |
+| Módulo desligado | admin desliga `fidelidade` de uma empresa | destino e telas de Fidelidade somem; Nova venda, Vendas e Indicadores continuam |
+| Só um módulo | empresa só com `fidelidade` | Nova venda e Vendas aparecem, sem campo Código nem Indicadores |
 | Cabeçalho | empresa "Lanchonete da Maria" logada | cabeçalho mostra "Lanchonete da Maria" |
 | Marca única | abrir login, cadastro e título da aba | só aparece "Kero System"; nenhum nome de empresa cliente fixo no código |
 

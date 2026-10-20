@@ -19,7 +19,7 @@ App web para pequenos negócios: **qualquer empresa** cria sua conta e usa os m�
 - **Telas seguem o `specs/design/DESIGN.md`**: aparência, textos, componentes e o checklist da seção 13 antes de dar uma tela como pronta. Em conflito sobre comportamento, a spec vence.
 - Se a spec for ambígua ou tiver item **[a confirmar]**, pergunte em vez de assumir.
 - Base: `specs/000-empresas/` (cadastro de empresa, isolamento por `empresa_id` + RLS, módulos). Toda tabela e consulta de módulo é por empresa.
-- Módulo atual: `specs/001-indicacao/`. O cartão fidelidade (`002-fidelidade`) é futuro, não implementar.
+- Módulos: `specs/001-indicacao/` e `specs/002-fidelidade/` (cartão fidelidade). Cada módulo é independente e pode ser desligado por empresa; vendas e clientes são base comum (spec 000, RE5 e RE7). Telas, campos e regras de um módulo só valem com ele ativo.
 
 ## Stack
 

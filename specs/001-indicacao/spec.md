@@ -1,10 +1,12 @@
 # Spec 001 — Sistema de Indicação (MVP)
 
-> Status: **aprovada para implementação** (decisões fechadas em 2026-10-20; revisada no mesmo dia: sem comissão nem pagamento ao indicador, e telas detalhadas na seção 10; revisada de novo no mesmo dia: o produto passa a ser o **Kero System**, para várias empresas, ver `specs/000-empresas/`). Qualquer mudança de regra deve ser feita aqui **antes** do código.
+> Status: **aprovada para implementação** (decisões fechadas em 2026-10-20; revisada no mesmo dia: sem comissão nem pagamento ao indicador, e telas detalhadas na seção 10; revisada de novo no mesmo dia: o produto passa a ser o **Kero System**, para várias empresas, ver `specs/000-empresas/`; revisada de novo no mesmo dia com a spec 002: vendas e clientes viram base comum dos módulos e a fidelidade cria uma exceção no cancelamento). Qualquer mudança de regra deve ser feita aqui **antes** do código.
 
 ## 1. Contexto
 
 O **Kero System** é um app para pequenos negócios; cada empresa tem sua conta e usa os módulos do sistema (`specs/000-empresas/`). Este é o módulo de **Indicação**: o responsável pela empresa autoriza pessoas a terem um código de desconto; quando um cliente usa esse código, a venda fica registrada como indicação daquela pessoa. A recompensa do indicador é **combinada pelo responsável diretamente com ele, fora do sistema**; o sistema só mostra quem indicou quem e quanto cada indicador gerou em vendas.
+
+Clientes e vendas (RN4, RN8 a RN12 e telas 10.5 a 10.8) são **base comum** de todos os módulos (spec 000, RE7): continuam descritos aqui, mas existem mesmo sem o módulo de Indicação; nesse caso, as partes de código e indicador somem das telas.
 
 Tudo nesta spec vale **dentro de uma empresa**: indicadores, clientes, códigos e vendas pertencem à empresa logada e nunca aparecem para outra (RE3 e RE4 da spec 000).
 
@@ -15,7 +17,7 @@ Hoje não há como saber quem indicou quem nem quanto cada indicador gerou em ve
 ## 3. Usuário e acesso
 
 - **Usuário: o responsável pela empresa** (dono ou dona do negócio), operando pelo celular, com login via **Supabase Auth**. A conta é criada pelo cadastro de empresa (spec 000); um usuário por empresa no MVP.
-- Indicadores e clientes **não têm acesso** ao sistema. São apenas registros.
+- Indicadores e clientes **não têm acesso** ao sistema. São apenas registros. Exceção: o cliente vê o próprio cartão fidelidade por link (spec 002).
 - **Futuro previsto (fora do MVP):** tela somente de visualização para o indicador (ver os usos dos seus códigos). Nada disso deve ser implementado agora; o modelo já é compatível porque o indicador é identificado por telefone único.
 
 ## 4. Objetivo do MVP e critérios de sucesso
@@ -41,7 +43,6 @@ Validar que o responsável por uma empresa consegue operar o programa de indica�
 
 ### Fora do MVP (não implementar)
 - **Comissão e pagamento ao indicador**: combinados pelo responsável fora do sistema; o sistema não calcula, não guarda e não exibe comissão.
-- Cartão fidelidade (será a spec `002-fidelidade`).
 - Tela/login de indicador e de cliente (ver "Futuro previsto" na seção 3).
 - Cardápio, itens da venda, estoque.
 - Pagamento online, integração com WhatsApp API, envio automático de mensagens.
@@ -80,13 +81,13 @@ Validar que o responsável por uma empresa consegue operar o programa de indica�
 - Todos os valores em **centavos inteiros**; arredondamento ao centavo, metade para cima.
 - O percentual aplicado fica **gravado na venda** (mudanças futuras no código não alteram vendas passadas).
 
-**RN9 — Venda sem código.** O código é opcional. Venda sem código não gera desconto, mas fica registrada e segue o mesmo ciclo da RN10 (necessário para a fidelidade na v2). Venda sem código **não gera mensagem** para o cliente (ver seção 9).
+**RN9 — Venda sem código.** O código é opcional. Venda sem código não gera desconto, mas fica registrada e segue o mesmo ciclo da RN10 (e ganha carimbo na fidelidade, spec 002). Venda sem código **não gera mensagem** para o cliente (ver seção 9).
 
 **RN10 — Ciclo da venda.** Estados: `pendente` → `confirmada`, e `pendente` ou `confirmada` → `cancelada`. Toda venda nasce `pendente`. Apenas o responsável confirma, pelo botão **Confirmar recebimento**. Vendas não são editadas. A venda registra a data e hora do lançamento, da confirmação e do cancelamento. Na tela, os estados aparecem como **Aguardando pagamento** (`pendente`), **Pago** (`confirmada`) e **Cancelada** (`cancelada`).
 
 **RN11 — (removida em 2026-10-20).** Saldo e pagamento ao indicador saíram do sistema (ver seção 5, "Fora do MVP"). O número fica reservado para não renumerar as demais regras.
 
-**RN12 — Cancelamento e imutabilidade.** Vendas não são editadas; erros são corrigidos por **cancelamento**, preservando o histórico. Cancelar venda pendente ou confirmada é **livre** (não há bloqueio). Uma venda confirmada que é cancelada deixa de contar como uso do código e sai do resumo do indicador. Venda já cancelada não pode ser cancelada de novo.
+**RN12 — Cancelamento e imutabilidade.** Vendas não são editadas; erros são corrigidos por **cancelamento**, preservando o histórico. Cancelar venda pendente ou confirmada é **livre** (não há bloqueio), com uma exceção: venda cujo carimbo já foi usado em um resgate do cartão fidelidade não pode ser cancelada enquanto o resgate não for desfeito (spec 002, RF5). Uma venda confirmada que é cancelada deixa de contar como uso do código e sai do resumo do indicador. Venda já cancelada não pode ser cancelada de novo.
 
 ## 8. Mensagem para o cliente
 
@@ -125,7 +126,8 @@ Valores em formato brasileiro (`R$ 1.234,56`) com **espaço comum** (não usar e
 Regras comuns a todas as telas (detalhes visuais no `specs/design/DESIGN.md`):
 
 - Cabeçalho com o nome da empresa logada (spec 000, RE6).
-- Navegação inferior fixa com **Nova venda** (em destaque), **Vendas** e **Indicadores** (destinos do módulo Indicação, mostrados porque ele está ativo; spec 000, RE5). Telas fora desses três destinos têm o botão **Voltar** escrito.
+- Navegação inferior fixa com os destinos dos módulos ativos (spec 000, RE5 e RE7; ordem na spec 002, seção 10): **Nova venda** (em destaque) e **Vendas** (base comum), **Indicadores** (só com Indicação) e **Fidelidade** (só com Fidelidade). Telas fora dos destinos têm o botão **Voltar** escrito.
+- **Sem o módulo Indicação ativo:** a Nova venda não tem o campo Código (toda venda é sem código, RN9), a Lista de vendas não tem o filtro Indicador e os cartões de venda não mostram código nem indicador.
 - Toda tela trata **Carregando** ("Carregando…"), **Erro** (mensagem clara + "Tentar de novo") e **Sem conexão** ("Sem internet. Nada foi salvo."). Nada é mostrado como salvo antes de o servidor confirmar.
 - Erros de formulário aparecem embaixo do campo, sem apagar o que foi digitado.
 - Estados da venda sempre com os rótulos **Aguardando pagamento**, **Pago** e **Cancelada**.
@@ -240,6 +242,7 @@ Fluxo da seção 9 em três telas, com "Passo N de 3" no topo. **Voltar** retorn
   - RN6: "Este cliente já usa os códigos de {indicador}. Cancele esta venda e lance de novo com um código de {indicador}."
   - RN5: "Este cliente já tem uma compra paga, então o código {codigo} não vale mais. Cancele esta venda e lance de novo com outro código ou sem código."
 - **Cancelar venda:** estilo de perigo. "Cancelar esta venda de R$ 104,50 de João?"; se estiver paga, acrescenta "Ela deixa de contar como uso do código." / "Sim, cancelar venda" e "Não, voltar". Depois, o selo vira **Cancelada**.
+- **Com o módulo Fidelidade ativo:** frase de carimbo depois de confirmar, aviso de carimbo no cancelamento e recusa de cancelar venda já usada em resgate, conforme a spec 002, seção 10.3.
 
 ## 11. Critérios de aceite
 
@@ -280,4 +283,3 @@ Nenhum bloqueante para o MVP.
 - **[a confirmar]** RN6: cancelar a única venda confirmada de um cliente mantém o vínculo com o indicador (proposta: sim, mantém).
 - **[a confirmar]** 10.7: filtros padrão da Lista de vendas (proposta: Todos / Últimos 7 dias / Todas).
 - Futuro: tela somente leitura para o indicador (seção 3).
-- Futuro: cartão fidelidade (`002-fidelidade`).

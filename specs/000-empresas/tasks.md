@@ -12,7 +12,7 @@ Tarefas com prefixo **E** para não confundir com as `T` da `001-indicacao`. As 
 
 ## Fase 2 — Banco
 - [ ] E5. Migration: `empresas`, `empresa_usuarios` (`user_id` único), `empresa_modulos`; função `empresa_atual()`; RLS dessas tabelas (só leitura da própria empresa) (depende de T9)
-- [ ] E6. RPC `criar_empresa(nome)`: em transação, cria empresa, vínculo do usuário como `responsavel` e módulo `indicacao` ativo; recusa usuário que já tem empresa (RE1, RE5) (depende de E5)
+- [ ] E6. RPC `criar_empresa(nome)`: em transação, cria empresa, vínculo do usuário como `responsavel` e todos os módulos ativos (`indicacao` e `fidelidade`); recusa usuário que já tem empresa (RE1, RE5) (depende de E5)
 - [ ] E7. Teste de integração com duas empresas: isolamento de leitura e gravação, mesmo código e mesmo telefone em empresas diferentes (spec seção 10). Roda de novo depois da T11/T12 da 001 (depende de E5, T11, T12)
 
 ## Fase 3 — Cadastro e sessão
