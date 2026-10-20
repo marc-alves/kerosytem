@@ -2,6 +2,7 @@ import { recusa, temErros, type Recusa } from "@/lib/casos-de-uso/resultado";
 import type { RepositorioIndicacao } from "@/lib/dados/tipos";
 import { lerReais } from "@/lib/formato/leitura";
 import { normalizarCodigo, validarCodigo } from "@/lib/indicacao/codigo";
+import { podeCancelarVenda, podeConfirmar } from "@/lib/indicacao/status";
 import { normalizarTelefone } from "@/lib/indicacao/telefone";
 import type { AvisoCodigo, CalculoVenda, PontosBase, Telefone } from "@/lib/indicacao/tipos";
 import { calcularVenda } from "@/lib/indicacao/venda";
@@ -98,4 +99,39 @@ export async function lancarVenda(
   const clienteId = cliente.id ?? (await repo.inserirCliente({ nome: cliente.nome, telefone: cliente.telefone }, agora)).id;
   const venda = await repo.inserirVenda({ clienteId, codigoId: codigo?.id ?? null, calculo }, agora);
   return { ok: true, vendaId: venda.id };
+}
+
+const VENDA_NAO_ENCONTRADA = "Venda não encontrada.";
+
+/**
+ * RN10: revalida o vínculo (RN6) e a primeira compra (RN5) com o estado de agora;
+ * na primeira venda confirmada com código, liga o cliente ao indicador.
+ */
+export async function confirmarRecebimento(
+  repo: RepositorioIndicacao,
+  vendaId: string,
+  agora: Date,
+): Promise<{ ok: true } | Recusa<never>> {
+  const venda = await repo.venda(vendaId);
+  if (!venda) return recusa({ geral: VENDA_NAO_ENCONTRADA });
+  const { paraValidar } = await repo.buscarCliente(venda.cliente.telefone);
+  const resultado = podeConfirmar({ venda, cliente: paraValidar });
+  if (!resultado.ok) return recusa({ geral: resultado.mensagem });
+  const vincularA = resultado.criarVinculo && venda.codigo ? venda.codigo.indicadorId : null;
+  await repo.confirmarVenda(vendaId, vincularA, agora);
+  return { ok: true };
+}
+
+/** RN12: pendente ou paga, cancelar é livre; o vínculo do cliente não é desfeito (RN6). */
+export async function cancelarVenda(
+  repo: RepositorioIndicacao,
+  vendaId: string,
+  agora: Date,
+): Promise<{ ok: true } | Recusa<never>> {
+  const venda = await repo.venda(vendaId);
+  if (!venda) return recusa({ geral: VENDA_NAO_ENCONTRADA });
+  const resultado = podeCancelarVenda(venda);
+  if (!resultado.ok) return recusa({ geral: resultado.mensagem });
+  await repo.cancelarVenda(vendaId, agora);
+  return { ok: true };
 }

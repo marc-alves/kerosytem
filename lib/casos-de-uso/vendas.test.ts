@@ -1,4 +1,11 @@
-import { buscarClientePorTelefone, lancarVenda, previaVenda, type EntradaVenda } from "@/lib/casos-de-uso/vendas";
+import {
+  buscarClientePorTelefone,
+  cancelarVenda,
+  confirmarRecebimento,
+  lancarVenda,
+  previaVenda,
+  type EntradaVenda,
+} from "@/lib/casos-de-uso/vendas";
 import { criarRepositorioEmMemoria } from "@/lib/dados/memoria";
 import { criarSemente, EMPRESA_A, EMPRESA_B } from "@/lib/dados/semente";
 import type { RepositorioIndicacao } from "@/lib/dados/tipos";
@@ -147,5 +154,113 @@ describe("lancarVenda (spec 10.5, RN10)", () => {
     await a.definirCodigoAtivo("a-cod-camila5", false);
     const r = await lancarVenda(a, joao, agora);
     expect(r.ok ? null : r.erros.codigo).toMatch(/está desativado/);
+  });
+});
+
+describe("confirmarRecebimento e cancelarVenda (spec 10.8, seção 11)", () => {
+  async function lancar(entrada: EntradaVenda) {
+    const r = await lancarVenda(a, entrada, agora);
+    if (!r.ok) throw new Error(JSON.stringify(r.erros));
+    return r.vendaId;
+  }
+  const camila = async () => (await a.listarIndicadores()).find((i) => i.nome === "Camila")!;
+  const usosCamila5 = async () => (await a.buscarCodigo("camila5"))!.usos;
+  const vinculoDe = (telefone: string) => banco.clientes.find((c) => c.telefone === telefone)?.indicadorId;
+
+  it("confirmar conta o uso, entra no resumo e cria o vínculo na primeira vez", async () => {
+    const id = await lancar({ ...novo, codigo: "camila5", valor: "110" });
+    const [usos, resumo] = [await usosCamila5(), await camila()];
+    expect(await confirmarRecebimento(a, id, agora)).toEqual({ ok: true });
+    expect(await a.venda(id)).toMatchObject({ status: "confirmada", confirmadaEm: agora });
+    expect(await usosCamila5()).toBe(usos + 1);
+    expect(await camila()).toMatchObject({
+      vendasPagas: resumo.vendasPagas + 1,
+      totalVendido: resumo.totalVendido + 10450,
+    });
+    expect(vinculoDe("5561977771234")).toBe("a-ind-camila");
+  });
+
+  it("venda sem código não cria vínculo", async () => {
+    const id = await lancar(novo);
+    await confirmarRecebimento(a, id, agora);
+    expect(vinculoDe("5561977771234")).toBeNull();
+  });
+
+  it("vínculo conflitante na confirmação: recusada e continua aguardando (RN6)", async () => {
+    // Duas vendas pendentes do cliente novo, uma de cada indicador; confirma a da Camila primeiro.
+    const daCamila = await lancar({ ...novo, codigo: "camila5" });
+    const daAmanda = await lancar({ ...novo, codigo: "primeiraamanda" });
+    await confirmarRecebimento(a, daCamila, agora);
+    expect(await confirmarRecebimento(a, daAmanda, agora)).toEqual({
+      ok: false,
+      erros: {
+        geral: "Este cliente já usa os códigos de Camila. Cancele esta venda e lance de novo com um código de Camila.",
+      },
+    });
+    expect((await a.venda(daAmanda))?.status).toBe("pendente");
+  });
+
+  it("segunda primeira compra na confirmação: recusada (RN5)", async () => {
+    const primeira = await lancar({ ...novo, codigo: "primeiraamanda" });
+    const segunda = await lancar({ ...novo, codigo: "primeiraamanda" });
+    expect(await confirmarRecebimento(a, primeira, agora)).toEqual({ ok: true });
+    const r = await confirmarRecebimento(a, segunda, agora);
+    expect(r.ok ? null : r.erros.geral).toMatch(/já tem uma compra paga, então o código primeiraamanda não vale mais/);
+  });
+
+  it("não confirma duas vezes nem venda cancelada", async () => {
+    const id = await lancar(novo);
+    await confirmarRecebimento(a, id, agora);
+    expect(await confirmarRecebimento(a, id, agora)).toEqual({ ok: false, erros: { geral: "Esta venda já está paga." } });
+    await cancelarVenda(a, id, agora);
+    const r = await confirmarRecebimento(a, id, agora);
+    expect(r.ok ? null : r.erros.geral).toBe("Esta venda foi cancelada e não pode ser confirmada.");
+  });
+
+  it("cancelar pendente: usos e resumo não mudam", async () => {
+    const id = await lancar(joao);
+    const [usos, resumo] = [await usosCamila5(), await camila()];
+    expect(await cancelarVenda(a, id, agora)).toEqual({ ok: true });
+    expect(await a.venda(id)).toMatchObject({ status: "cancelada", canceladaEm: agora, confirmadaEm: null });
+    expect(await usosCamila5()).toBe(usos);
+    expect(await camila()).toEqual(resumo);
+  });
+
+  it("cancelar paga: sem bloqueio, deixa de contar uso e sai do resumo; vínculo fica (RN12, RN6)", async () => {
+    const [usos, resumo] = [await usosCamila5(), await camila()];
+    expect(await cancelarVenda(a, "a-ven-1", agora)).toEqual({ ok: true });
+    expect(await a.venda("a-ven-1")).toMatchObject({ status: "cancelada", confirmadaEm: expect.any(Date) });
+    expect(await usosCamila5()).toBe(usos - 1);
+    expect(await camila()).toMatchObject({
+      vendasPagas: resumo.vendasPagas - 1,
+      totalVendido: resumo.totalVendido - 10450,
+    });
+    expect(vinculoDe("5561900000010")).toBe("a-ind-camila");
+  });
+
+  it("não cancela duas vezes", async () => {
+    expect(await cancelarVenda(a, "a-ven-2", agora)).toEqual({
+      ok: false,
+      erros: { geral: "Esta venda já foi cancelada." },
+    });
+  });
+
+  it("venda de outra empresa: não encontrada", async () => {
+    expect(await confirmarRecebimento(a, "b-ven-1", agora)).toEqual({ ok: false, erros: { geral: "Venda não encontrada." } });
+    expect(await cancelarVenda(a, "b-ven-1", agora)).toEqual({ ok: false, erros: { geral: "Venda não encontrada." } });
+  });
+
+  it("limite atingido avisa, mas a 11ª venda é aceita; pendentes não contam (RN3)", async () => {
+    // camila5 já tem 2 usos; faz mais 7 → 9 confirmadas, e 5 pendentes.
+    for (let i = 0; i < 7; i++) await confirmarRecebimento(a, await lancar(joao), agora);
+    for (let i = 0; i < 5; i++) await lancar(joao);
+    let r = await previaVenda(a, joao, agora);
+    expect(r.ok && r.previa.avisos).toEqual([]);
+    await confirmarRecebimento(a, await lancar(joao), agora);
+    r = await previaVenda(a, joao, agora);
+    expect(r.ok && r.previa.avisos.map((x) => x.mensagem)).toEqual([
+      "Este código atingiu 10 usos, considere gerar um novo código para Camila.",
+    ]);
+    expect((await lancarVenda(a, joao, agora)).ok).toBe(true);
   });
 });
