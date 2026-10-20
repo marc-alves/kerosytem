@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Botao } from "@/components/botao";
 
 /**
@@ -31,6 +31,8 @@ export function DialogoConfirmacao({
   onVoltar: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  // Vários cartões na mesma tela têm cada um o seu diálogo.
+  const idTitulo = useId();
 
   useEffect(() => {
     const dialogo = ref.current;
@@ -42,7 +44,7 @@ export function DialogoConfirmacao({
   return (
     <dialog
       ref={ref}
-      aria-labelledby="dialogo-titulo"
+      aria-labelledby={idTitulo}
       onCancel={(e) => {
         // Tecla Voltar/Esc: mesmo efeito de "Não, voltar".
         e.preventDefault();
@@ -51,7 +53,7 @@ export function DialogoConfirmacao({
       className="m-auto w-[calc(100%-2rem)] max-w-app rounded-cartao border border-borda bg-superficie p-0 text-texto backdrop:bg-texto/60"
     >
       <div className="flex flex-col gap-4 p-5">
-        <h2 id="dialogo-titulo" className="text-titulo font-semibold">
+        <h2 id={idTitulo} className="text-titulo font-semibold">
           {titulo}
         </h2>
         <div className="text-base">{children}</div>
