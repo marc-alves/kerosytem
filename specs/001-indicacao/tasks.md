@@ -31,7 +31,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [ ] T16. `registrarPagamentoIndicador` (dinheiro / crédito em produtos), recusando valor acima do saldo, e `cancelarPagamento` (depende de T7, T15)
 
 ## Fase 4 — Base visual (`DESIGN.md`)
-- [ ] T27. Tema: tokens de cor, tamanhos e espaçamentos do `DESIGN.md` no `@theme` de `app/globals.css`; **remover o modo escuro**; `lang="pt-BR"` e título do app no `layout.tsx`; fonte única (`system-ui` ou `next/font`) com texto base 18px em `rem`; remover a página de exemplo do template
+- [x] T27. Tema: tokens de cor, tamanhos e espaçamentos do `DESIGN.md` no `@theme` de `app/globals.css`; **remover o modo escuro**; `lang="pt-BR"` e título do app no `layout.tsx`; fonte única (`system-ui` ou `next/font`) com texto base 18px em `rem`; remover a página de exemplo do template
 - [ ] T28. Logo: arquivo oficial em `public/` (você fornece o arquivo; não recriar) e conferência das cores da seção 4 do `DESIGN.md`
 - [ ] T29. Máscara de telefone para o campo (enquanto digita), em `lib/formato/`, com testes (depende de T2)
 - [ ] T30. Componentes base (`DESIGN.md` seções 7 e 9): botão (primário, secundário, perigo), campo com rótulo e exemplo, cartão, selo de status ("Aguardando pagamento", "Pago", "Cancelada" com ícone), aviso, diálogo de confirmação e estados carregando, vazio, erro e sem conexão (depende de T27)
