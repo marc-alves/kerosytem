@@ -7,7 +7,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F1. Atualizar junto: spec 000 (seção 3, RE5, RE7 nova, seção 5), spec 001 (base comum, RN12, seções 5, 10 e 10.8) e `AGENTS.md` (depende de F0)
 
 ## Fase 1 — Regras puras (`lib/fidelidade/`)
-- [ ] F2. `validarPrograma` (RF1, spec 10.4): meta de 2 a 50, prêmio obrigatório até 60 caracteres sem espaços nas pontas, valor mínimo opcional com `lerReais`, prazo de 0 a 90 dias (padrão 7); mensagens da spec
+- [x] F2. `validarPrograma` (RF1, spec 10.4): meta de 2 a 50, prêmio obrigatório até 60 caracteres sem espaços nas pontas, valor mínimo opcional com `lerReais`, prazo de 0 a 90 dias (padrão 7); mensagens da spec
 - [ ] F3. `ganhaCarimbo` (RF3) e `dataLiberacao` (RF4): só venda confirmada, lançada depois da criação do programa, com valor final ≥ valor mínimo; com e sem código; liberação às 00h00 de Brasília do dia da confirmação + prazo, ou na hora com prazo 0 (inclusive confirmação às 23h30 de Brasília)
 - [ ] F4. `estadoCartao` (RF4, RF6): carimbos no cartão, liberados, a liberar, exibido (0 à meta), completo, sobra, faltam, pode resgatar e data do prêmio liberado; casos da seção 12 (9→10 de 10, completo a liberar, 12 de 10 com 9 liberados, meta ajustada de 10 para 8) (depende de F3)
 - [ ] F5. `escolherCarimbosDoResgate` (os liberados mais antigos), `podeDesfazerResgate` e `podeCancelarPorFidelidade` (RF5, RF6, RF7), com as mensagens da spec 10.2 e 10.3 (depende de F4)
