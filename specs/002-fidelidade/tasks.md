@@ -31,7 +31,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 ## Fase 4 — Telas da empresa (seguem a spec 10.x citada e o checklist)
 - [x] F18. Componente **cartão de carimbos** (M espaços preenchidos até o exibido, liberado e a liberar com ícones diferentes, "N de M" escrito), com teste (depende de F4, T30)
 - [x] F19. Configurar / ajustar cartão (**spec 10.4**) em `/fidelidade/ajustar` e no `/fidelidade` sem programa: quatro campos, prévia enquanto digita, diálogo ao ajustar, erros da spec; rotas de `/fidelidade` com módulo desligado vão para `/` (depende de F8, F12, F18)
-- [ ] F20. Lista de cartões (**spec 10.1**) em `/fidelidade`: resumo do programa (com o prazo) e **Ajustar cartão**, busca na URL, cartões ordenados com selo **Cartão completo** ou **Prêmio liberado em dd/mm**, vazio e busca sem resultado (depende de F16, F18)
+- [x] F20. Lista de cartões (**spec 10.1**) em `/fidelidade`: resumo do programa (com o prazo) e **Ajustar cartão**, busca na URL, cartões ordenados com selo **Cartão completo** ou **Prêmio liberado em dd/mm**, vazio e busca sem resultado (depende de F16, F18)
 - [ ] F21. Cartão do cliente (**spec 10.2**) em `/fidelidade/clientes/[id]`: cartão, a liberar com a próxima data, sobra, histórico (liberado / libera em, carimbo retirado, resgate desfeito) (depende de F16, F18)
 - [ ] F22. **Registrar resgate** (ou o aviso "Prêmio liberado a partir de…") e **Desfazer resgate** no cartão do cliente, com os diálogos e a recusa da spec 10.2; sem toque duplo (depende de F15, F21)
 - [ ] F23. **Copiar mensagem** (vira "✓ Copiado") e **Gerar novo link** com diálogo, no cartão do cliente (depende de F15, F17, F21)

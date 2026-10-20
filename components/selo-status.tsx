@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { IconeCheck, IconeDesativado, IconeRelogio, IconeX } from "@/components/icones";
+import { IconeCheck, IconeDesativado, IconeEstrela, IconeRelogio, IconeX } from "@/components/icones";
 import type { StatusVenda } from "@/lib/indicacao/tipos";
 
 /** Rótulos fixos da venda na tela (spec RN10, DESIGN.md seção 10). */
@@ -43,6 +43,19 @@ export function SeloCodigo({ ativo }: { ativo: boolean }) {
   ) : (
     <Pilula classes="bg-creme text-texto-suave" icone={<IconeDesativado />}>
       Desativado
+    </Pilula>
+  );
+}
+
+/** Cartão fidelidade completo (spec 002, 10.1): liberado para resgate, ou com a data em que libera. */
+export function SeloCartaoCompleto({ liberadoEm }: { liberadoEm: string | null }) {
+  return liberadoEm === null ? (
+    <Pilula classes="bg-pago-fundo text-pago-texto" icone={<IconeEstrela />}>
+      Cartão completo
+    </Pilula>
+  ) : (
+    <Pilula classes="bg-aviso-fundo text-aviso-texto" icone={<IconeRelogio />}>
+      Prêmio liberado em {liberadoEm}
     </Pilula>
   );
 }
