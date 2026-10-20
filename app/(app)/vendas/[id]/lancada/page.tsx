@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { BotaoCopiar } from "@/app/(app)/vendas/[id]/lancada/botao-copiar";
+import { BotaoCopiar } from "@/components/botao-copiar";
 import { DesfazerVenda } from "@/app/(app)/vendas/[id]/lancada/desfazer-venda";
 import { classesBotao } from "@/components/botao";
 import { Cabecalho } from "@/components/cabecalho";

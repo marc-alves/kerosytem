@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Botao } from "@/components/botao";
+import { Botao, type VarianteBotao } from "@/components/botao";
 
 /** Reserva para quando não há `navigator.clipboard` (só existe em HTTPS, ex.: testando pela rede local). */
 function copiarSemClipboard(texto: string): boolean {
@@ -19,8 +19,19 @@ function copiarSemClipboard(texto: string): boolean {
   }
 }
 
-/** Copia o texto cru, com `*` e `~` (seção 8); vira "✓ Copiado" e fica assim enquanto estiver na tela. */
-export function BotaoCopiar({ texto }: { texto: string }) {
+/**
+ * Copia o texto cru, com `*` e `~` (seção 8); vira "✓ Copiado" e fica assim enquanto estiver na tela.
+ * `variante = "secundario"` quando a tela já tem outro botão principal.
+ */
+export function BotaoCopiar({
+  texto,
+  rotulo = "Copiar mensagem",
+  variante = "primario",
+}: {
+  texto: string;
+  rotulo?: string;
+  variante?: VarianteBotao;
+}) {
   const [copiado, setCopiado] = useState(false);
   const [erro, setErro] = useState(false);
 
@@ -38,8 +49,8 @@ export function BotaoCopiar({ texto }: { texto: string }) {
 
   return (
     <>
-      <Botao onClick={copiar} aria-live="polite">
-        {copiado ? "✓ Copiado" : "Copiar mensagem"}
+      <Botao variante={variante} onClick={copiar} aria-live="polite">
+        {copiado ? "✓ Copiado" : rotulo}
       </Botao>
       {erro && (
         <p role="alert" className="text-base font-semibold text-erro-texto">
