@@ -1,11 +1,6 @@
-import { Cabecalho } from "@/components/cabecalho";
+import { FormularioVenda } from "@/app/(app)/vendas/nova/formulario-venda";
 
-// Provisória: a tela de verdade é a T19.
+/** Spec 10.5. */
 export default function PaginaNovaVenda() {
-  return (
-    <>
-      <Cabecalho titulo="Nova venda" />
-      <p className="px-4 py-6 text-base text-texto-suave">Esta tela ainda vai ser feita.</p>
-    </>
-  );
+  return <FormularioVenda />;
 }
