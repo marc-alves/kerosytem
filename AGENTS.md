@@ -16,6 +16,7 @@ App web da Kero Salgados (espetinhos de frango). Hoje só a dona do negócio usa
 
 - **As regras de negócio vivem em `specs/<funcionalidade>/spec.md`.** Leia a spec antes de implementar e não invente escopo.
 - Ordem de trabalho: `spec.md` → `plan.md` → `tasks.md`. Execute uma tarefa por vez e marque `[x]` em `tasks.md`.
+- **Telas seguem o `DESIGN.md`** (raiz): aparência, textos, componentes e o checklist da seção 13 antes de dar uma tela como pronta. Em conflito sobre comportamento, a spec vence.
 - Se a spec for ambígua ou tiver item **[a confirmar]**, pergunte em vez de assumir.
 - Funcionalidade atual: `specs/001-indicacao/`. O cartão fidelidade (`002-fidelidade`) é futuro, não implementar.
 
@@ -35,7 +36,7 @@ Ajuste conforme o gerenciador de pacotes do repo (npm como padrão):
 ## Convenções
 
 - Dinheiro sempre em **centavos inteiros**; formatar como `R$ 1.234,56` só na exibição.
-- Regras de negócio em módulo puro (`src/lib/<funcionalidade>/`), sem acesso a banco, com testes unitários.
+- Regras de negócio em módulo puro (`lib/<funcionalidade>/`, na raiz, ao lado de `app/`; não usar `src/`), sem acesso a banco, com testes unitários.
 - Gravações (venda, pagamento) feitas no servidor, nunca confiando em valores calculados no cliente.
 - Textos de interface e mensagens de erro em português claro, sem jargão.
 - Nunca commitar `.env*` nem chaves do Supabase.
