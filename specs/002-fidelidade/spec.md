@@ -198,6 +198,7 @@ Regras comuns: as mesmas da spec 001, seção 10 (cabeçalho com o nome da empre
 
 ### 10.4 Configurar / ajustar cartão
 
+- **Dois passos** (no máximo 3 campos por vez, `DESIGN.md` seção 2), com "Passo N de 2" no topo e **Voltar** mantendo o que foi digitado: passo 1 com carimbos e prêmio; passo 2 com valor mínimo e prazo.
 - **Campos:**
   - Carimbos para completar (ex.: 10; teclado numérico).
   - Prêmio (ex.: 1 salgado grátis).
