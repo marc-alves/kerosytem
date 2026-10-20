@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { CartaoCarimbos } from "@/components/cartao-carimbos";
 import { Campo } from "@/components/campo";
 import { Escolha } from "@/components/escolha";
 import { SeloCodigo, SeloStatus } from "@/components/selo-status";
@@ -59,5 +60,25 @@ describe("Escolha", () => {
     expect(html.match(/type="radio"/g)).toHaveLength(2);
     expect(html).toMatch(/checked="" value="normal"/);
     expect(html).toContain("Só para quem nunca comprou");
+  });
+});
+
+describe("CartaoCarimbos", () => {
+  const estado = {
+    meta: 10, noCartao: 4, liberados: 3, aLiberar: 1, exibido: 4, completo: false, sobra: 0, faltam: 6,
+    podeResgatar: false, premioLiberadoEm: null, proximaLiberacao: null,
+  };
+
+  it("desenha a meta, com liberados e a liberar diferentes, e escreve N de M", () => {
+    const html = renderToStaticMarkup(<CartaoCarimbos estado={estado} />);
+    expect(html.match(/<li/g)).toHaveLength(10);
+    expect(html.match(/border-dashed/g)).toHaveLength(1);
+    expect(html).toContain('aria-label="4 de 10 carimbos"');
+    expect(html).toContain("4 de 10 carimbos</p>");
+  });
+
+  it("na página do cliente, todos os exibidos aparecem iguais", () => {
+    const html = renderToStaticMarkup(<CartaoCarimbos estado={estado} mostrarALiberar={false} />);
+    expect(html).not.toContain("border-dashed");
   });
 });

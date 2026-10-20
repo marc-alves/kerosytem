@@ -29,7 +29,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F17. Montar o link completo no servidor com `APP_URL` ou, sem ela, com o host da requisição (depende de F16)
 
 ## Fase 4 — Telas da empresa (seguem a spec 10.x citada e o checklist)
-- [ ] F18. Componente **cartão de carimbos** (M espaços preenchidos até o exibido, liberado e a liberar com ícones diferentes, "N de M" escrito), com teste (depende de F4, T30)
+- [x] F18. Componente **cartão de carimbos** (M espaços preenchidos até o exibido, liberado e a liberar com ícones diferentes, "N de M" escrito), com teste (depende de F4, T30)
 - [ ] F19. Configurar / ajustar cartão (**spec 10.4**) em `/fidelidade/ajustar` e no `/fidelidade` sem programa: quatro campos, prévia enquanto digita, diálogo ao ajustar, erros da spec; rotas de `/fidelidade` com módulo desligado vão para `/` (depende de F8, F12, F18)
 - [ ] F20. Lista de cartões (**spec 10.1**) em `/fidelidade`: resumo do programa (com o prazo) e **Ajustar cartão**, busca na URL, cartões ordenados com selo **Cartão completo** ou **Prêmio liberado em dd/mm**, vazio e busca sem resultado (depende de F16, F18)
 - [ ] F21. Cartão do cliente (**spec 10.2**) em `/fidelidade/clientes/[id]`: cartão, a liberar com a próxima data, sobra, histórico (liberado / libera em, carimbo retirado, resgate desfeito) (depende de F16, F18)
