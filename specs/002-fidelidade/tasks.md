@@ -12,7 +12,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F4. `estadoCartao` (RF4, RF6): carimbos no cartão, liberados, a liberar, exibido (0 à meta), completo, sobra, faltam, pode resgatar e data do prêmio liberado; casos da seção 12 (9→10 de 10, completo a liberar, 12 de 10 com 9 liberados, meta ajustada de 10 para 8) (depende de F3)
 - [x] F5. `escolherCarimbosDoResgate` (os liberados mais antigos), `podeDesfazerResgate` e `podeCancelarPorFidelidade` (RF5, RF6, RF7), com as mensagens da spec 10.2 e 10.3 (depende de F4)
 - [x] F6. `primeiroNome` e as quatro mensagens da seção 8, mais `escolherMensagem`; exemplo da seção 8 exatamente igual (depende de F4)
-- [ ] F7. `ordenarCartoes` (spec 10.1) e `historicoPublico` (spec 11.1: sem retirados, sem desfeitos, sem valores) (depende de F4)
+- [x] F7. `ordenarCartoes` (spec 10.1) e `historicoPublico` (spec 11.1: sem retirados, sem desfeitos, sem valores) (depende de F4)
 
 ## Fase 2 — Módulos independentes (base, spec 000 RE5 e RE7)
 - [ ] F8. Todos os módulos ativos na semente e `moduloAtivo(empresa, modulo)` num só lugar; navegação montada pelos módulos ativos (Nova venda e Vendas com qualquer módulo, Indicadores com `indicacao`, Fidelidade com `fidelidade`), com testes das combinações e frase "Nenhum módulo ativo. Fale com o Kero System." sem módulos (depende de E9, ou faz a parte de módulos dela sobre a sessão mockada)
