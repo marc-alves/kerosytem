@@ -14,7 +14,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [x] T4. `validarCodigo` — código (RN2, RN3): ativo e validade recusam (válido até 23h59 de Brasília do dia de validade); limite de usos **não recusa**, apenas devolve o aviso (`limiteAtingido`); só vendas confirmadas contam (9 confirmadas + 5 pendentes = sem aviso) (depende de T2)
 - [x] T5. `validarCodigo` — cliente (RN5, RN6, RN7): primeira compra só sem venda confirmada, com aviso se houver venda pendente; vínculo ao indicador; recusa de autoindicação por telefone (depende de T4)
 - [x] T26. `formatarReais` e `formatarPercentual` em `lib/formato/` (seção 8, `DESIGN.md` seção 5): `R$ 1.234,56` com espaço comum (o `Intl` do pt-BR usa espaço não separável: trocar); `5%` e `7,5%` (depende de T1)
-- [ ] T6. `gerarMensagem` (seção 8): `*nome*`, `~riscado~`, `*final*`, usando T26; só existe para venda com código (RN9) (depende de T26)
+- [x] T6. `gerarMensagem` (seção 8): `*nome*`, `~riscado~`, `*final*`, usando T26; só existe para venda com código (RN9) (depende de T26)
 - [ ] T7. `calcularSaldo` (RN11): só vendas confirmadas entram; pendentes saem à parte como "a confirmar"; pagamento ao indicador não pode passar do saldo (depende de T3)
 - [ ] T8. Transições de status (RN10, RN12, RN6, RN5): pendente→confirmada, pendente/confirmada→cancelada; confirmar recusa quando o cliente já tem vínculo com outro indicador **e** quando a venda é de primeira compra e o cliente já tem outra venda confirmada; cancelar venda confirmada é bloqueado se o saldo ficaria negativo (depende de T5, T7)
 
