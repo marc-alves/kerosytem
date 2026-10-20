@@ -7,7 +7,7 @@
 - **Next.js 16 (App Router) + TypeScript**, já em uso no projeto. `app/` fica na raiz; **não usar `src/`**.
 - **Supabase (Postgres + Auth)** para dados e login da dona. Um único usuário, criado à mão no painel; cadastro público desativado.
 - **Tailwind v4**: tokens do `DESIGN.md` no `@theme` de `app/globals.css` (não há `tailwind.config`).
-- **Vitest** para testes (`npm test`).
+- **Jest** para testes (`npm test`).
 - UI em **pt-BR**, mobile-first, tema claro apenas.
 - Regras de negócio em um **módulo puro** (`lib/indicacao/`), sem dependência de banco ou framework, para testar fácil.
 

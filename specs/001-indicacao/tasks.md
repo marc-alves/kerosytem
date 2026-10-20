@@ -8,7 +8,7 @@ Ordem sugerida. Cada tarefa é pequena e entregável sozinha; "depende de" indic
 - [x] T0. Atualizar o `plan.md` para refletir a spec aprovada: status da venda (`pendente|confirmada|cancelada`), `limite_usos` no código, telefone normalizado único (cliente e indicador), vínculo criado na confirmação, saldo só com vendas confirmadas, login Supabase Auth. Verificação: revisão sua do `plan.md`. **Bloqueia a Fase 2 em diante.**
 
 ## Fase 1 — Regras puras (sem banco, sem tela, em `lib/`)
-- [ ] T1. Configurar Vitest e o script `npm test` (verificação: um teste de exemplo em `lib/indicacao/` passa)
+- [ ] T1. Configurar Jest e o script `npm test` (verificação: um teste de exemplo em `lib/indicacao/` passa)
 - [ ] T2. `normalizarCodigo` e `normalizarTelefone` (RN1, RN4): maiúsculas/minúsculas; formatos de telefone equivalentes; telefone inválido recusado (depende de T1)
 - [ ] T3. `calcularVenda` (RN8): centavos inteiros, percentuais em centésimos de ponto, arredondamento metade para cima; caso 110,00 / 5% / 3% → desconto 5,50, final 104,50, comissão 3,14 (depende de T1)
 - [ ] T4. `validarCodigo` — código (RN2, RN3): ativo e validade recusam (válido até 23h59 de Brasília do dia de validade); limite de usos **não recusa**, apenas devolve o aviso (`limiteAtingido`); só vendas confirmadas contam (9 confirmadas + 5 pendentes = sem aviso) (depende de T2)
