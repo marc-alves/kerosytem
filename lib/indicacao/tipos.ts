@@ -92,3 +92,20 @@ export type Saldo = {
 };
 
 export type ResultadoPagamento = { ok: true } | Falha<"valor_invalido" | "acima_do_saldo">;
+
+/** Venda já gravada, com o código e o indicador dela (`null` em venda sem código, RN9). */
+export type VendaParaTransicao = {
+  status: StatusVenda;
+  comissao: Centavos;
+  codigo: { codigo: string; tipo: TipoCodigo; indicadorId: string; indicadorNome: string } | null;
+};
+
+export type ResultadoConfirmacao =
+  | {
+      ok: true;
+      /** Primeira venda confirmada com código: liga o cliente ao indicador (RN6). */
+      criarVinculo: boolean;
+    }
+  | Falha<"venda_nao_pendente" | "cliente_de_outro_indicador" | "primeira_compra_ja_feita">;
+
+export type ResultadoCancelamento = { ok: true } | Falha<"venda_ja_cancelada" | "saldo_ficaria_negativo">;
