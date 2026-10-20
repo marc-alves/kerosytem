@@ -1,4 +1,12 @@
-import { desfazerResgate, gerarNovoLink, registrarResgate, salvarPrograma } from "@/lib/casos-de-uso/fidelidade";
+import {
+  desfazerResgate,
+  gerarNovoLink,
+  listarCartoes,
+  registrarResgate,
+  salvarPrograma,
+  verCartaoCliente,
+  verCartaoPublico,
+} from "@/lib/casos-de-uso/fidelidade";
 import { cancelarVenda, confirmarRecebimento, lancarVenda, type FidelidadeNaVenda } from "@/lib/casos-de-uso/vendas";
 import { criarRepositorioEmMemoria, criarRepositorioFidelidadeEmMemoria, lerCartaoPublico } from "@/lib/dados/memoria";
 import { criarSemente, EMPRESA_A, EMPRESA_B } from "@/lib/dados/semente";
@@ -176,5 +184,51 @@ describe("gerarNovoLink (RF8)", () => {
 
   it("cliente sem cartão ou de outra empresa", async () => {
     expect(await gerarNovoLink(b, "a-cli-joao", agora, () => "x")).toEqual({ ok: false, erros: { geral: "Cartão não encontrado." } });
+  });
+});
+
+describe("leituras (spec 10.1, 10.2, 11.1)", () => {
+  const contexto = { empresaNome: "Lanchonete da Maria", link: (c: string) => `https://kero.app/cartao/${c}` };
+
+  it("lista: completos primeiro, depois por carimbos; busca por nome ou telefone", async () => {
+    const r = await listarCartoes(a, "", agora);
+    expect(r.cartoes.map((c) => c.cliente.nome)).toEqual(["Ana Souza", "Bia", "Carla", "João", "Pedro"]);
+    expect(r.total).toBe(5);
+    expect((await listarCartoes(a, "joao", agora)).cartoes.map((c) => c.cliente.nome)).toEqual(["João"]);
+    expect((await listarCartoes(a, "90000-0013", agora)).cartoes.map((c) => c.cliente.nome)).toEqual(["Bia"]);
+    expect(await listarCartoes(b, "", agora)).toEqual({ programa: null, total: 0, cartoes: [] });
+  });
+
+  it("cartão da Carla: histórico com resgate, resgate desfeito e carimbos", async () => {
+    const r = (await verCartaoCliente(a, "a-cli-carla", agora, contexto))!;
+    expect(r.estado).toMatchObject({ noCartao: 2, meta: 10 });
+    expect(r.link).toBe("https://kero.app/cartao/teste-carla");
+    expect(r.mensagem).toBe("*Carla*, este é o seu cartão fidelidade da Lanchonete da Maria:\nhttps://kero.app/cartao/teste-carla");
+    const resgates = r.historico.filter((h) => h.tipo === "resgate");
+    expect(resgates.map((h) => h.id)).toEqual(["a-res-carla-1", "a-res-carla-0"]);
+    expect(r.historico.filter((h) => h.tipo === "carimbo")).toHaveLength(12);
+    // Mais novos primeiro.
+    expect([...r.historico].sort((x, y) => y.em.getTime() - x.em.getTime())).toEqual(r.historico);
+  });
+
+  it("cartão de cliente de outra empresa ou sem cartão: null", async () => {
+    expect(await verCartaoCliente(b, "a-cli-carla", agora, contexto)).toBeNull();
+    expect(await verCartaoCliente(a, "nao-existe", agora, contexto)).toBeNull();
+  });
+
+  it("venda listada diz se deu carimbo e se ele entrou num resgate", async () => {
+    expect((await vendasA.venda("a-ven-carla-1"))?.carimbo).toEqual({ usadoEmResgate: true, retirado: false });
+    expect((await vendasA.venda("a-ven-carla-12"))?.carimbo).toEqual({ usadoEmResgate: false, retirado: false });
+    expect((await vendasA.venda("a-ven-5"))?.carimbo).toBeNull();
+  });
+
+  it("página do cliente: primeiro nome, sem desfeitos nem valores", () => {
+    const r = verCartaoPublico(lerCartaoPublico(banco, "teste-ana"), agora)!;
+    expect(r).toMatchObject({ empresaNome: "Lanchonete da Maria", primeiroNome: "Ana", premio: "1 salgado grátis", valorMinimo: null });
+    expect(r.estado).toMatchObject({ completo: true, podeResgatar: true });
+    expect(r.historico).toHaveLength(10);
+    const carla = verCartaoPublico(lerCartaoPublico(banco, "teste-carla"), agora)!;
+    expect(carla.historico.filter((h) => h.tipo === "resgate")).toHaveLength(1);
+    expect(verCartaoPublico(lerCartaoPublico(banco, "abc"), agora)).toBeNull();
   });
 });

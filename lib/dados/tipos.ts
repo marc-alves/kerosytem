@@ -140,6 +140,8 @@ export type CodigoComUsos = Omit<Codigo, "empresaId" | "indicadorId"> & { usos: 
 export type VendaListada = Omit<Venda, "empresaId" | "clienteId" | "codigoId"> & {
   cliente: { id: string; nome: string; telefone: Telefone };
   codigo: { id: string; codigo: string; tipo: TipoCodigo; indicadorId: string; indicadorNome: string } | null;
+  /** Carimbo da fidelidade que a venda deu (spec 002, 10.3); `null` se não deu. */
+  carimbo: { usadoEmResgate: boolean; retirado: boolean } | null;
 };
 
 export type DetalheIndicador = {

@@ -69,6 +69,7 @@ export function criarRepositorioEmMemoria(
     const cliente = clientes().find((c) => c.id === v.clienteId)!;
     const codigo = v.codigoId === null ? null : codigos().find((c) => c.id === v.codigoId)!;
     const indicador = codigo && indicadores().find((i) => i.id === codigo.indicadorId)!;
+    const carimbo = banco.carimbos.find((c) => c.empresaId === empresaId && c.vendaId === v.id);
     return {
       id: v.id,
       valorOriginal: v.valorOriginal,
@@ -90,6 +91,7 @@ export function criarRepositorioEmMemoria(
               indicadorNome: indicador.nome,
             }
           : null,
+      carimbo: carimbo ? { usadoEmResgate: carimbo.resgateId !== null, retirado: carimbo.retiradoEm !== null } : null,
     };
   }
 

@@ -1,6 +1,10 @@
 import { recusa, type Recusa } from "@/lib/casos-de-uso/resultado";
-import type { Programa, RepositorioFidelidade } from "@/lib/dados/tipos";
-import { escolherCarimbosDoResgate, podeDesfazerResgate } from "@/lib/fidelidade/cartao";
+import type { CartaoPublicoDados, Programa, RepositorioFidelidade } from "@/lib/dados/tipos";
+import { escolherCarimbosDoResgate, estadoCartao, podeDesfazerResgate } from "@/lib/fidelidade/cartao";
+import { combinaBusca, historicoPublico, ordenarCartoes, type ItemHistoricoPublico } from "@/lib/fidelidade/lista";
+import { escolherMensagem, primeiroNome } from "@/lib/fidelidade/mensagem";
+import type { EstadoCartao } from "@/lib/fidelidade/tipos";
+import type { Centavos, Telefone } from "@/lib/indicacao/tipos";
 import { validarPrograma, type CamposPrograma, type EntradaPrograma } from "@/lib/fidelidade/programa";
 
 /** Spec 10.4: cria ou ajusta o programa da empresa (RF1, RF2); vale daqui para frente. */
@@ -66,4 +70,122 @@ export async function gerarNovoLink(
   if (!(await repo.cartaoCliente(clienteId))) return recusa({ geral: CARTAO_NAO_ENCONTRADO });
   await repo.trocarChave(clienteId, gerarChave(), agora);
   return { ok: true };
+}
+
+// ---- Leituras (F16) ----
+
+type ClienteDoCartao = { id: string; nome: string; telefone: Telefone };
+
+/** Spec 10.1: programa e cartões, já filtrados pela busca e na ordem da tela. */
+export async function listarCartoes(
+  repo: RepositorioFidelidade,
+  busca: string,
+  agora: Date,
+): Promise<{ programa: Programa | null; total: number; cartoes: { cliente: ClienteDoCartao; estado: EstadoCartao }[] }> {
+  const programa = await repo.programa();
+  if (!programa) return { programa: null, total: 0, cartoes: [] };
+  const todos = (await repo.listarCartoes()).map((c) => ({
+    nome: c.cliente.nome,
+    cliente: c.cliente,
+    estado: estadoCartao({ carimbos: c.carimbos, meta: programa.meta, agora }),
+  }));
+  const achados = todos.filter((c) => combinaBusca(c.cliente, busca));
+  return {
+    programa,
+    total: todos.length,
+    cartoes: ordenarCartoes(achados).map(({ cliente, estado }) => ({ cliente, estado })),
+  };
+}
+
+export type ItemHistorico =
+  | {
+      tipo: "carimbo";
+      id: string;
+      em: Date;
+      valorFinal: Centavos;
+      liberadoEm: Date;
+      liberado: boolean;
+      /** Venda cancelada: carimbo retirado (RF5). */
+      retiradoEm: Date | null;
+    }
+  | { tipo: "resgate"; id: string; em: Date; premio: string; meta: number; desfeitoEm: Date | null };
+
+export type CartaoClienteVisto = {
+  cliente: ClienteDoCartao;
+  programa: Programa;
+  estado: EstadoCartao;
+  link: string;
+  /** Mensagem do botão "Copiar mensagem" (spec 10.2). */
+  mensagem: string;
+  /** Mais novos primeiro. */
+  historico: ItemHistorico[];
+};
+
+/** Spec 10.2; `null` se não há programa ou o cliente não tem cartão nesta empresa. */
+export async function verCartaoCliente(
+  repo: RepositorioFidelidade,
+  clienteId: string,
+  agora: Date,
+  contexto: { empresaNome: string; link: (chave: string) => string },
+): Promise<CartaoClienteVisto | null> {
+  const [programa, cartao] = await Promise.all([repo.programa(), repo.cartaoCliente(clienteId)]);
+  if (!programa || !cartao) return null;
+  const estado = estadoCartao({ carimbos: cartao.carimbos, meta: programa.meta, agora });
+  const link = contexto.link(cartao.chave);
+  const historico: ItemHistorico[] = [
+    ...cartao.carimbos.map((c) => ({
+      tipo: "carimbo" as const,
+      id: c.id,
+      em: c.criadoEm,
+      valorFinal: c.venda.valorFinal,
+      liberadoEm: c.liberadoEm,
+      liberado: c.liberadoEm.getTime() <= agora.getTime(),
+      retiradoEm: c.retiradoEm,
+    })),
+    ...cartao.resgates.map((r) => ({
+      tipo: "resgate" as const,
+      id: r.id,
+      em: r.criadoEm,
+      premio: r.premio,
+      meta: r.meta,
+      desfeitoEm: r.desfeitoEm,
+    })),
+  ].sort((a, b) => b.em.getTime() - a.em.getTime());
+  return {
+    cliente: cartao.cliente,
+    programa,
+    estado,
+    link,
+    mensagem: escolherMensagem({
+      nome: cartao.cliente.nome,
+      empresa: contexto.empresaNome,
+      link,
+      premio: programa.premio,
+      estado,
+      momento: "cartao",
+    }),
+    historico,
+  };
+}
+
+export type CartaoPublicoVisto = {
+  empresaNome: string;
+  primeiroNome: string;
+  premio: string;
+  valorMinimo: Centavos | null;
+  estado: EstadoCartao;
+  historico: ItemHistoricoPublico[];
+};
+
+/** Spec 11.1: monta a página do cliente só com o que a RF9 deixa; `null` = "não encontrado". */
+export function verCartaoPublico(dados: CartaoPublicoDados | null, agora: Date): CartaoPublicoVisto | null {
+  if (!dados) return null;
+  return {
+    empresaNome: dados.empresaNome,
+    primeiroNome: primeiroNome(dados.clienteNome),
+    premio: dados.programa.premio,
+    valorMinimo: dados.programa.valorMinimo,
+    estado: estadoCartao({ carimbos: dados.carimbos, meta: dados.programa.meta, agora }),
+    historico: historicoPublico(dados.carimbos, dados.resgates),
+  };
 }

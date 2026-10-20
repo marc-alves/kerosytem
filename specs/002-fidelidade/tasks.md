@@ -25,7 +25,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F13. Carimbo na confirmação: `confirmarRecebimento` dá o carimbo (só com o módulo ativo e o programa criado) na mesma gravação, com `liberadoEm`, e devolve o estado do cartão e a mensagem (RF3, RF4); os testes da 001 continuam passando (depende de F3, F4, F6, F10)
 - [x] F14. Cancelamento: `cancelarVenda` retira o carimbo não usado e **recusa** venda com carimbo em resgate não desfeito (RF5), devolvendo o id do cliente para o link da spec 10.3 (depende de F5, F13)
 - [x] F15. `registrarResgate` (os liberados mais antigos, recusa sem liberados suficientes), `desfazerResgate` (solta os carimbos) e `gerarNovoLink` (RF6, RF7, RF8) (depende de F5, F10)
-- [ ] F16. Leituras: programa, lista de cartões com busca por nome ou telefone, cartão do cliente com histórico, `carimbo` na `VendaListada`, e `cartaoPublico(chave)` fora do repositório da empresa, devolvendo só os campos da RF9 ou nada (link inválido, trocado ou módulo desligado) (depende de F7, F10)
+- [x] F16. Leituras: programa, lista de cartões com busca por nome ou telefone, cartão do cliente com histórico, `carimbo` na `VendaListada`, e `cartaoPublico(chave)` fora do repositório da empresa, devolvendo só os campos da RF9 ou nada (link inválido, trocado ou módulo desligado) (depende de F7, F10)
 - [ ] F17. Montar o link completo no servidor com `APP_URL` ou, sem ela, com o host da requisição (depende de F16)
 
 ## Fase 4 — Telas da empresa (seguem a spec 10.x citada e o checklist)
