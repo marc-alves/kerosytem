@@ -128,6 +128,31 @@ export default function PaginaTeste() {
           <ul className="flex flex-col gap-3">
             <Item href="/fidelidade">Lista de cartões e resumo do programa (spec 10.1)</Item>
             <Item href="/fidelidade/ajustar">Ajustar cartão, 2 passos (spec 10.4)</Item>
+            <Item href="/fidelidade/clientes/a-cli-ana">Ana: cartão completo e liberado; Registrar resgate (spec 10.2)</Item>
+            <Item href="/fidelidade/clientes/a-cli-bia">Bia: completa, mas o prêmio ainda está no prazo de devolução</Item>
+            <Item href="/fidelidade/clientes/a-cli-carla">Carla: já resgatou (e tem um resgate desfeito); 2 carimbos no cartão</Item>
+            <Item href="/fidelidade/clientes/a-cli-joao">João: no meio do cartão, com carimbo a liberar</Item>
+            <Item href="/fidelidade/clientes/b-cli-joao">Cliente de outra empresa: deve dar &quot;não encontrado&quot;</Item>
+          </ul>
+          <p className="text-base font-semibold">O que o cliente vê (sem login, spec 11.1):</p>
+          <ul className="flex flex-col gap-3">
+            <Item href="/cartao/teste-joao">Cartão do João</Item>
+            <Item href="/cartao/teste-bia">Cartão da Bia: completo, pode pedir a partir de…</Item>
+            <Item href="/cartao/teste-ana">Cartão da Ana: completo</Item>
+            <Item href="/cartao/abc">Link inventado: &quot;Este cartão não foi encontrado.&quot;</Item>
+          </ul>
+          <ul className="flex list-disc flex-col gap-2 pl-5 text-base">
+            <li>
+              Carimbo: confirme o recebimento da venda do João no detalhe da Camila; aparece &quot;João ganhou 1 carimbo&quot; e
+              o botão Copiar mensagem do cartão.
+            </li>
+            <li>
+              Venda presa num resgate: em Vendas (Tudo, Pago), cancele a venda mais antiga da Carla; a recusa traz o link para o
+              cartão dela. Desfaça o resgate e cancele de novo: passa.
+            </li>
+            <li>Gerar novo link no cartão da Ana e abrir o antigo (/cartao/teste-ana): &quot;não encontrado&quot;.</li>
+            <li>Só Fidelidade: desligue a Indicação acima; a Nova venda fica sem o campo Código e a venda ainda ganha carimbo.</li>
+            <li>Desligue a Fidelidade: o destino some e os links /cartao/… passam a dar &quot;não encontrado&quot;.</li>
           </ul>
           <form action={removerPrograma}>
             <Botao type="submit" variante="secundario">

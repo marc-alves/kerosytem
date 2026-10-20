@@ -39,7 +39,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 
 ## Fase 5 — Tela do cliente
 - [x] F25. Página **Meu cartão** em `/cartao/[chave]` (**spec 11.1**), fora do grupo `(app)`: sem login, cabeçalho nem navegação; `/cartao/` liberado no `proxy.ts`; não indexada; sem cache; completo liberado e a liberar; link inválido, trocado ou de módulo desligado com a mesma mensagem; nada de telefone, valor, código ou indicador (RF9); checklist (depende de F16, F18)
-- [ ] F26. Cenários da fidelidade na página `/teste` (sem programa, cartão no meio, completo a liberar, completo liberado, com sobra, venda bloqueada por resgate, só Fidelidade sem Indicação, link do cliente) (depende de F19 a F25)
+- [x] F26. Cenários da fidelidade na página `/teste` (sem programa, cartão no meio, completo a liberar, completo liberado, com sobra, venda bloqueada por resgate, só Fidelidade sem Indicação, link do cliente) (depende de F19 a F25)
 
 ## Fase 6 — Supabase
 - [ ] F27. Migration: `fidelidade_programas`, `fidelidade_carimbos` (venda única; `liberado_em`, `resgate_id`, `retirado_em`), `fidelidade_resgates`, `fidelidade_cartoes` (chave única no sistema), view do resumo dos cartões, RLS por empresa; todos os módulos ativos em `criar_empresa` e `fidelidade` ativado nas empresas existentes (depende de T11, T12, E5, E6)
