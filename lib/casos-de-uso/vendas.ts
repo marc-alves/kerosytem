@@ -10,6 +10,10 @@ import { calcularVenda } from "@/lib/indicacao/venda";
 type CamposCliente = "telefone" | "nome";
 type CamposVenda = CamposCliente | "codigo" | "valor";
 
+/** Com o módulo de Indicação desligado, a venda é sempre sem código (spec 000, RE7). */
+export type OpcoesVenda = { comCodigo: boolean };
+const COM_CODIGO: OpcoesVenda = { comCodigo: true };
+
 /** O que a pessoa digitou nas telas 1 e 2 da Nova venda (spec 10.5), sem nada calculado. */
 export type EntradaVenda = { telefone: string; nome: string; codigo: string; valor: string };
 
@@ -40,6 +44,7 @@ export async function previaVenda(
   repo: RepositorioIndicacao,
   entrada: EntradaVenda,
   agora: Date,
+  opcoes: OpcoesVenda = COM_CODIGO,
 ): Promise<{ ok: true; previa: PreviaVenda } | Recusa<CamposVenda>> {
   const telefone = normalizarTelefone(entrada.telefone);
   if (!telefone.ok) return recusa({ telefone: telefone.mensagem });
@@ -55,7 +60,9 @@ export async function previaVenda(
   const textoCodigo = normalizarCodigo(entrada.codigo);
   let codigo: PreviaVenda["codigo"] = null;
   let avisos: AvisoCodigo[] = [];
-  if (textoCodigo !== "") {
+  if (textoCodigo !== "" && !opcoes.comCodigo) {
+    erros.codigo = "Esta empresa não usa códigos de desconto. Lance sem código.";
+  } else if (textoCodigo !== "") {
     const encontrado = await repo.buscarCodigo(textoCodigo);
     const validacao = validarCodigo({ codigo: encontrado, cliente: paraValidar, agora });
     if (!validacao.ok) erros.codigo = validacao.mensagem;
@@ -91,8 +98,9 @@ export async function lancarVenda(
   repo: RepositorioIndicacao,
   entrada: EntradaVenda,
   agora: Date,
+  opcoes: OpcoesVenda = COM_CODIGO,
 ): Promise<{ ok: true; vendaId: string } | Recusa<CamposVenda>> {
-  const resultado = await previaVenda(repo, entrada, agora);
+  const resultado = await previaVenda(repo, entrada, agora, opcoes);
   if (!resultado.ok) return resultado;
   const { cliente, codigo, calculo } = resultado.previa;
 

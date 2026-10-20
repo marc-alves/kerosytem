@@ -10,7 +10,9 @@ import { Cartao } from "@/components/cartao";
 import { descreverCodigo } from "@/lib/formato/codigo";
 import { Carregando } from "@/components/estados";
 import { ROTULO_STATUS } from "@/components/selo-status";
-import { reiniciarBancoMock, repositorio } from "@/lib/dados/sessao";
+import { alternarModuloMock, empresaDaSessao, reiniciarBancoMock, repositorio } from "@/lib/dados/sessao";
+import type { Modulo } from "@/lib/dados/tipos";
+import { MODULOS, moduloAtivo } from "@/lib/empresas/modulos";
 import { formatarReais } from "@/lib/formato/numero";
 
 async function reiniciar() {
@@ -18,6 +20,34 @@ async function reiniciar() {
   if (process.env.NODE_ENV === "production") return;
   reiniciarBancoMock();
   refresh();
+}
+
+async function alternarModulo(modulo: Modulo) {
+  "use server";
+  if (process.env.NODE_ENV === "production") return;
+  alternarModuloMock(modulo);
+  refresh();
+}
+
+const NOME_MODULO: Record<Modulo, string> = { indicacao: "Indicação", fidelidade: "Fidelidade" };
+
+/** Spec 000, RE5: no Supabase, quem liga e desliga é o admin pelo painel. */
+async function Modulos() {
+  const empresa = await empresaDaSessao();
+  return (
+    <div className="flex flex-col gap-3">
+      {MODULOS.map((m) => {
+        const ativo = moduloAtivo(empresa, m);
+        return (
+          <form key={m} action={alternarModulo.bind(null, m)}>
+            <Botao type="submit" variante="secundario">
+              {ativo ? `Desligar ${NOME_MODULO[m]} (ligado)` : `Ligar ${NOME_MODULO[m]} (desligado)`}
+            </Botao>
+          </form>
+        );
+      })}
+    </div>
+  );
 }
 
 function Item({ href, children }: { href: string; children: ReactNode }) {
@@ -72,6 +102,13 @@ export default function PaginaTeste() {
               Voltar os dados ao começo
             </Botao>
           </form>
+        </Secao>
+
+        <Secao titulo="Módulos da empresa">
+          <p className="text-base">Desligue um módulo para ver o app só com o outro.</p>
+          <Suspense fallback={<Carregando />}>
+            <Modulos />
+          </Suspense>
         </Secao>
 
         <Secao titulo="Telas principais">

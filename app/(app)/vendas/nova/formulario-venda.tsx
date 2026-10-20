@@ -27,8 +27,11 @@ function Reais({ centavos }: { centavos: number }) {
   return <span className="whitespace-nowrap tabular-nums">{formatarReais(centavos)}</span>;
 }
 
-/** Spec 10.5 (fluxo da seção 9): cliente, compra e conferência. */
-export function FormularioVenda() {
+/**
+ * Spec 10.5 (fluxo da seção 9): cliente, compra e conferência.
+ * `comCodigo = false` quando a empresa não usa o módulo de Indicação (spec 000, RE7).
+ */
+export function FormularioVenda({ comCodigo }: { comCodigo: boolean }) {
   const router = useRouter();
   const [passo, setPasso] = useState<1 | 2 | 3>(1);
   const [campos, setCampos] = useState<Campos>(INICIAL);
@@ -191,23 +194,26 @@ export function FormularioVenda() {
       {passo === 2 && (
         <form onSubmit={continuarDaCompra} noValidate className="flex flex-1 flex-col">
           <div className="flex flex-col gap-6 px-4 py-4">
-            <Campo
-              id="codigo"
-              rotulo="Código (se tiver)"
-              exemplo="Ex.: camila5"
-              autoCapitalize="none"
-              autoCorrect="off"
-              autoComplete="off"
-              spellCheck={false}
-              autoFocus
-              enterKeyHint="next"
-              value={campos.codigo}
-              erro={erros.codigo}
-              onChange={(e) => mudar("codigo", e.target.value)}
-            />
+            {comCodigo && (
+              <Campo
+                id="codigo"
+                rotulo="Código (se tiver)"
+                exemplo="Ex.: camila5"
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="off"
+                spellCheck={false}
+                autoFocus
+                enterKeyHint="next"
+                value={campos.codigo}
+                erro={erros.codigo}
+                onChange={(e) => mudar("codigo", e.target.value)}
+              />
+            )}
             <Campo
               id="valor"
               rotulo="Valor da compra"
+              autoFocus={!comCodigo}
               exemplo="Ex.: 110 ou 110,50"
               inputMode="decimal"
               autoComplete="off"
@@ -239,10 +245,12 @@ export function FormularioVenda() {
               <p className="text-botao font-semibold">{previa.cliente.nome}</p>
               <p className="text-base">{formatarTelefone(previa.cliente.telefone)}</p>
             </div>
-            <div>
-              <p className="text-base text-texto-suave">Código</p>
-              <p className="text-botao font-semibold">{descreverCodigo(previa.codigo)}</p>
-            </div>
+            {comCodigo && (
+              <div>
+                <p className="text-base text-texto-suave">Código</p>
+                <p className="text-botao font-semibold">{descreverCodigo(previa.codigo)}</p>
+              </div>
+            )}
             <div className="flex flex-col gap-1">
               {previa.codigo ? (
                 <>

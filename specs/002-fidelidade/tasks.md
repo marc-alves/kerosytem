@@ -16,7 +16,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 
 ## Fase 2 — Módulos independentes (base, spec 000 RE5 e RE7)
 - [x] F8. Todos os módulos ativos na semente e `moduloAtivo(empresa, modulo)` num só lugar; navegação montada pelos módulos ativos (Nova venda e Vendas com qualquer módulo, Indicadores com `indicacao`, Fidelidade com `fidelidade`), com testes das combinações e frase "Nenhum módulo ativo. Fale com o Kero System." sem módulos (depende de E9, ou faz a parte de módulos dela sobre a sessão mockada)
-- [ ] F9. Telas de venda sem Indicação: Nova venda sem o campo Código (e `previaVenda`/`lancarVenda` recusam código), Lista de vendas sem o filtro Indicador, cartões sem código; rotas `/indicadores/*` vão para `/` (depende de F8)
+- [x] F9. Telas de venda sem Indicação: Nova venda sem o campo Código (e `previaVenda`/`lancarVenda` recusam código), Lista de vendas sem o filtro Indicador, cartões sem código; rotas `/indicadores/*` vão para `/` (depende de F8)
 
 ## Fase 3 — Casos de uso sobre o banco em memória
 - [ ] F10. Tipos e banco em memória: `ProgramaFidelidade`, `Carimbo` (com `liberadoEm`, `resgateId`, `retiradoEm`), `Resgate`, `CartaoFidelidade` no `Banco`; interface `RepositorioFidelidade` em `lib/dados/tipos.ts` e implementação em `lib/dados/memoria.ts`; chave do link com 32 bytes aleatórios em base64url; teste de isolamento entre as duas empresas (depende de F8)

@@ -42,6 +42,23 @@ describe("buscarClientePorTelefone (spec 10.5, tela 1)", () => {
   });
 });
 
+describe("venda sem o módulo de Indicação (spec 000, RE7)", () => {
+  const semCodigo = { comCodigo: false };
+
+  it("sem código: prévia e lançamento normais", async () => {
+    const r = await previaVenda(a, { ...joao, codigo: "" }, agora, semCodigo);
+    expect(r.ok && r.previa.calculo).toEqual({ valorOriginal: 11000, descontoBp: 0, valorDesconto: 0, valorFinal: 11000 });
+    expect((await lancarVenda(a, { ...joao, codigo: "" }, agora, semCodigo)).ok).toBe(true);
+  });
+
+  it("código enviado mesmo assim é recusado", async () => {
+    expect(await lancarVenda(a, joao, agora, semCodigo)).toEqual({
+      ok: false,
+      erros: { codigo: "Esta empresa não usa códigos de desconto. Lance sem código." },
+    });
+  });
+});
+
 describe("previaVenda (spec 10.5, seção 11)", () => {
   it("venda com código normal: 110,00 com 5% → 5,50 de desconto, 104,50 final", async () => {
     const r = await previaVenda(a, { ...joao, codigo: "CAMILA5" }, agora);

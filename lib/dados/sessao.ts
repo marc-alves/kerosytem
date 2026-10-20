@@ -22,6 +22,14 @@ export function reiniciarBancoMock() {
   global.__bancoKeroVersao = VERSAO_SEMENTE;
 }
 
+/** Liga ou desliga um módulo da empresa da sessão (só para a página /teste; no Supabase é pelo painel). */
+export function alternarModuloMock(modulo: Modulo) {
+  const empresa = banco().empresas.find((e) => e.id === EMPRESA_A)!;
+  empresa.modulosAtivos = empresa.modulosAtivos.includes(modulo)
+    ? empresa.modulosAtivos.filter((m) => m !== modulo)
+    : [...empresa.modulosAtivos, modulo];
+}
+
 /** Empresa da sessão (nome no cabeçalho, módulos ativos). */
 export async function empresaDaSessao(): Promise<Empresa> {
   // Os dados mudam a cada requisição: nada disso entra no pré-render.

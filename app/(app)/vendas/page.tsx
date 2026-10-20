@@ -5,7 +5,8 @@ import { classesBotao } from "@/components/botao";
 import { Cabecalho } from "@/components/cabecalho";
 import { CartaoVenda } from "@/components/cartao-venda";
 import { Carregando, Vazio } from "@/components/estados";
-import { repositorio } from "@/lib/dados/sessao";
+import { empresaDaSessao, repositorio } from "@/lib/dados/sessao";
+import { moduloAtivo } from "@/lib/empresas/modulos";
 import { inicioDoPeriodo, PERIODOS } from "@/lib/indicacao/periodo";
 
 type Parametros = Awaited<PageProps<"/vendas">["searchParams"]>;
@@ -30,8 +31,11 @@ function lerFiltros(parametros: Parametros, indicadores: ReadonlyArray<{ id: str
 
 async function ListaVendas({ searchParams }: { searchParams: PageProps<"/vendas">["searchParams"] }) {
   const repo = await repositorio();
-  const indicadores = await repo.listarIndicadores();
-  const filtros = lerFiltros(await searchParams, indicadores);
+  const comIndicacao = moduloAtivo(await empresaDaSessao(), "indicacao");
+  // Sem o módulo de Indicação, nada de filtro Indicador nem código nos cartões (spec 000, RE7).
+  const indicadores = comIndicacao ? await repo.listarIndicadores() : [];
+  const lidos = lerFiltros(await searchParams, indicadores);
+  const filtros = comIndicacao ? lidos : { ...lidos, indicador: "todos" };
   const vendas = await repo.listarVendas({
     indicador: filtros.indicador,
     desde: inicioDoPeriodo(filtros.periodo, new Date()),
@@ -40,7 +44,10 @@ async function ListaVendas({ searchParams }: { searchParams: PageProps<"/vendas"
 
   return (
     <>
-      <FiltrosVendas filtros={filtros} indicadores={indicadores.map(({ id, nome }) => ({ id, nome }))} />
+      <FiltrosVendas
+        filtros={filtros}
+        indicadores={comIndicacao ? indicadores.map(({ id, nome }) => ({ id, nome })) : null}
+      />
       {vendas.length === 0 ? (
         <Vazio
           mensagem="Nenhuma venda neste filtro."
@@ -54,7 +61,7 @@ async function ListaVendas({ searchParams }: { searchParams: PageProps<"/vendas"
         <ul className="flex flex-col gap-3" aria-label="Vendas">
           {vendas.map((v) => (
             <li key={v.id}>
-              <CartaoVenda venda={v} />
+              <CartaoVenda venda={v} mostrarCodigo={comIndicacao} />
             </li>
           ))}
         </ul>

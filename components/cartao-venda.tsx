@@ -16,8 +16,9 @@ import { dataEmBrasilia, formatarData, formatarDataHora } from "@/lib/indicacao/
 /**
  * Venda com **Confirmar recebimento** (só aguardando) e **Cancelar venda** (não nas canceladas),
  * cada um com o diálogo da spec 10.8. Recusas do servidor ficam no cartão até a próxima ação.
+ * `mostrarCodigo = false` sem o módulo de Indicação (spec 000, RE7).
  */
-export function CartaoVenda({ venda }: { venda: VendaListada }) {
+export function CartaoVenda({ venda, mostrarCodigo = true }: { venda: VendaListada; mostrarCodigo?: boolean }) {
   const [dialogo, setDialogo] = useState<"confirmar" | "cancelar" | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [ocupado, iniciar] = useTransition();
@@ -41,7 +42,7 @@ export function CartaoVenda({ venda }: { venda: VendaListada }) {
     <Cartao className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-botao font-semibold">{nome}</p>
-        <p className="text-base">{descreverCodigo(venda.codigo)}</p>
+        {mostrarCodigo && <p className="text-base">{descreverCodigo(venda.codigo)}</p>}
         <p className="text-valor font-semibold tabular-nums">{valor}</p>
         <p className="text-base text-texto-suave">Lançada em {formatarDataHora(venda.criadoEm)}</p>
         {venda.canceladaEm && (
