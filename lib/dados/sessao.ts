@@ -41,6 +41,11 @@ export function alternarModuloMock(modulo: Modulo) {
     : [...empresa.modulosAtivos, modulo];
 }
 
+/** Tira o programa da fidelidade da empresa da sessão, para testar a criação (só para a /teste). */
+export function removerProgramaMock() {
+  banco().programas = banco().programas.filter((p) => p.empresaId !== EMPRESA_A);
+}
+
 /** Empresa da sessão (nome no cabeçalho, módulos ativos). */
 export async function empresaDaSessao(): Promise<Empresa> {
   // Os dados mudam a cada requisição: nada disso entra no pré-render.

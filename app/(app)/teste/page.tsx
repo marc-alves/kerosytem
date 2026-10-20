@@ -10,7 +10,13 @@ import { Cartao } from "@/components/cartao";
 import { descreverCodigo } from "@/lib/formato/codigo";
 import { Carregando } from "@/components/estados";
 import { ROTULO_STATUS } from "@/components/selo-status";
-import { alternarModuloMock, empresaDaSessao, reiniciarBancoMock, repositorio } from "@/lib/dados/sessao";
+import {
+  alternarModuloMock,
+  empresaDaSessao,
+  reiniciarBancoMock,
+  removerProgramaMock,
+  repositorio,
+} from "@/lib/dados/sessao";
 import type { Modulo } from "@/lib/dados/tipos";
 import { MODULOS, moduloAtivo } from "@/lib/empresas/modulos";
 import { formatarReais } from "@/lib/formato/numero";
@@ -26,6 +32,13 @@ async function alternarModulo(modulo: Modulo) {
   "use server";
   if (process.env.NODE_ENV === "production") return;
   alternarModuloMock(modulo);
+  refresh();
+}
+
+async function removerPrograma() {
+  "use server";
+  if (process.env.NODE_ENV === "production") return;
+  removerProgramaMock();
   refresh();
 }
 
@@ -109,6 +122,18 @@ export default function PaginaTeste() {
           <Suspense fallback={<Carregando />}>
             <Modulos />
           </Suspense>
+        </Secao>
+
+        <Secao titulo="Cartão fidelidade (spec 002)">
+          <ul className="flex flex-col gap-3">
+            <Item href="/fidelidade">Lista de cartões e resumo do programa (spec 10.1)</Item>
+            <Item href="/fidelidade/ajustar">Ajustar cartão, 2 passos (spec 10.4)</Item>
+          </ul>
+          <form action={removerPrograma}>
+            <Botao type="submit" variante="secundario">
+              Tirar o programa (para testar a criação)
+            </Botao>
+          </form>
         </Secao>
 
         <Secao titulo="Telas principais">
