@@ -3,6 +3,9 @@ import type { Telefone } from "@/lib/indicacao/tipos";
 import {
   ViolacaoUnicidade,
   type Banco,
+  type CartaoDoCliente,
+  type CartaoPublicoDados,
+  type RepositorioFidelidade,
   type Codigo,
   type CodigoComUsos,
   type RepositorioIndicacao,
@@ -232,20 +235,152 @@ export function criarRepositorioEmMemoria(
       return venda;
     },
 
-    async confirmarVenda(id, vincularA, agora) {
+    async confirmarVenda(id, vincularA, agora, carimbo = null) {
       const venda = vendaDaEmpresa(id);
+      if (carimbo && banco.carimbos.some((c) => c.vendaId === id)) throw new Error(`venda já tem carimbo: ${id}`);
       venda.status = "confirmada";
       venda.confirmadaEm = agora;
       if (vincularA !== null) {
         const cliente = clientes().find((c) => c.id === venda.clienteId)!;
         cliente.indicadorId ??= vincularA;
       }
+      if (carimbo) {
+        banco.carimbos.push({
+          id: gerarId(),
+          empresaId,
+          clienteId: venda.clienteId,
+          vendaId: id,
+          valorMinimoAplicado: carimbo.valorMinimoAplicado,
+          criadoEm: agora,
+          liberadoEm: carimbo.liberadoEm,
+          resgateId: null,
+          retiradoEm: null,
+        });
+        const temCartao = banco.cartoes.some((c) => c.empresaId === empresaId && c.clienteId === venda.clienteId);
+        if (!temCartao) {
+          banco.cartoes.push({ empresaId, clienteId: venda.clienteId, chave: carimbo.chave, criadoEm: agora, chaveTrocadaEm: null });
+        }
+      }
     },
 
     async cancelarVenda(id, agora) {
       const venda = vendaDaEmpresa(id);
+      const carimbo = banco.carimbos.find((c) => c.empresaId === empresaId && c.vendaId === id);
+      // Como a RPC: a venda usada num resgate não é cancelada (spec 002, RF5).
+      if (carimbo?.resgateId) throw new Error(`venda em resgate: ${id}`);
       venda.status = "cancelada";
       venda.canceladaEm = agora;
+      if (carimbo && carimbo.retiradoEm === null) carimbo.retiradoEm = agora;
     },
+  };
+}
+
+/** Fidelidade em memória (provisório, até a F30), filtrada por `empresaId` como a RLS. */
+export function criarRepositorioFidelidadeEmMemoria(
+  banco: Banco,
+  empresaId: string,
+  gerarId: () => string = () => crypto.randomUUID(),
+): RepositorioFidelidade {
+  const daEmpresa = <T extends { empresaId: string }>(linhas: T[]) => linhas.filter((l) => l.empresaId === empresaId);
+
+  function montar(clienteId: string): CartaoDoCliente | null {
+    const cliente = daEmpresa(banco.clientes).find((c) => c.id === clienteId);
+    const cartao = daEmpresa(banco.cartoes).find((c) => c.clienteId === clienteId);
+    if (!cliente || !cartao) return null;
+    const vendas = daEmpresa(banco.vendas);
+    return {
+      cliente: { id: cliente.id, nome: cliente.nome, telefone: cliente.telefone },
+      chave: cartao.chave,
+      carimbos: daEmpresa(banco.carimbos)
+        .filter((c) => c.clienteId === clienteId)
+        .map((c) => {
+          const venda = vendas.find((v) => v.id === c.vendaId)!;
+          return { ...c, venda: { valorFinal: venda.valorFinal, canceladaEm: venda.canceladaEm } };
+        }),
+      resgates: daEmpresa(banco.resgates).filter((r) => r.clienteId === clienteId),
+    };
+  }
+
+  return {
+    async programa() {
+      return daEmpresa(banco.programas)[0] ?? null;
+    },
+
+    async listarCartoes() {
+      return daEmpresa(banco.cartoes).map((c) => montar(c.clienteId)!);
+    },
+
+    async cartaoCliente(clienteId) {
+      return montar(clienteId);
+    },
+
+    async carimboDaVenda(vendaId) {
+      return daEmpresa(banco.carimbos).find((c) => c.vendaId === vendaId) ?? null;
+    },
+
+    async salvarPrograma(dados, agora) {
+      const atual = daEmpresa(banco.programas)[0];
+      if (atual) {
+        Object.assign(atual, dados, { atualizadoEm: agora });
+        return atual;
+      }
+      const novo = { ...dados, empresaId, criadoEm: agora, atualizadoEm: agora };
+      banco.programas.push(novo);
+      return novo;
+    },
+
+    async inserirResgate({ clienteId, meta, premio, carimboIds }, agora) {
+      const carimbos = carimboIds.map((id) => daEmpresa(banco.carimbos).find((c) => c.id === id));
+      const livres = carimbos.every(
+        (c) => c && c.clienteId === clienteId && c.resgateId === null && c.retiradoEm === null && c.liberadoEm <= agora,
+      );
+      if (!livres || carimbos.length !== meta) throw new Error("carimbos do resgate não estão livres no cartão");
+      const resgate = { id: gerarId(), empresaId, clienteId, meta, premio, criadoEm: agora, desfeitoEm: null };
+      banco.resgates.push(resgate);
+      for (const c of carimbos) c!.resgateId = resgate.id;
+      return resgate;
+    },
+
+    async desfazerResgate(id, agora) {
+      const resgate = daEmpresa(banco.resgates).find((r) => r.id === id);
+      if (!resgate || resgate.desfeitoEm !== null) throw new Error(`resgate não pode ser desfeito: ${id}`);
+      resgate.desfeitoEm = agora;
+      for (const c of daEmpresa(banco.carimbos)) if (c.resgateId === id) c.resgateId = null;
+    },
+
+    async trocarChave(clienteId, chave, agora) {
+      const cartao = daEmpresa(banco.cartoes).find((c) => c.clienteId === clienteId);
+      if (!cartao) throw new Error(`cliente sem cartão: ${clienteId}`);
+      cartao.chave = chave;
+      cartao.chaveTrocadaEm = agora;
+    },
+  };
+}
+
+/**
+ * Página do cliente, sem login (faz o papel da RPC `security definer` `cartao_publico`):
+ * `null` para chave que não existe, trocada, de empresa sem o módulo ou sem programa.
+ */
+export function lerCartaoPublico(banco: Banco, chave: string): CartaoPublicoDados | null {
+  const cartao = banco.cartoes.find((c) => c.chave === chave);
+  if (!cartao) return null;
+  const empresa = banco.empresas.find((e) => e.id === cartao.empresaId);
+  const programa = banco.programas.find((p) => p.empresaId === cartao.empresaId);
+  const cliente = banco.clientes.find((c) => c.id === cartao.clienteId && c.empresaId === cartao.empresaId);
+  if (!empresa || !empresa.modulosAtivos.includes("fidelidade") || !programa || !cliente) return null;
+  const doCliente = <T extends { empresaId: string; clienteId: string }>(linhas: T[]) =>
+    linhas.filter((l) => l.empresaId === cartao.empresaId && l.clienteId === cartao.clienteId);
+  return {
+    empresaNome: empresa.nome,
+    clienteNome: cliente.nome,
+    programa: { meta: programa.meta, premio: programa.premio, valorMinimo: programa.valorMinimo },
+    carimbos: doCliente(banco.carimbos).map(({ id, criadoEm, liberadoEm, resgateId, retiradoEm }) => ({
+      id,
+      criadoEm,
+      liberadoEm,
+      resgateId,
+      retiradoEm,
+    })),
+    resgates: doCliente(banco.resgates).map(({ id, criadoEm, desfeitoEm }) => ({ id, criadoEm, desfeitoEm })),
   };
 }

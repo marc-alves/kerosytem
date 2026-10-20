@@ -57,6 +57,56 @@ export type Venda = {
   canceladaEm: Date | null;
 };
 
+// ---- Fidelidade (spec 002, plan.md da 002, "Modelo de dados") ----
+
+/** Um por empresa (RF1). */
+export type Programa = {
+  empresaId: string;
+  meta: number;
+  premio: string;
+  valorMinimo: Centavos | null;
+  diasLiberacao: number;
+  criadoEm: Date;
+  atualizadoEm: Date;
+};
+
+/** Gravado na confirmação da venda (RF3, RF4); nunca apagado. */
+export type Carimbo = {
+  id: string;
+  empresaId: string;
+  clienteId: string;
+  /** Única: uma venda dá no máximo 1 carimbo. */
+  vendaId: string;
+  valorMinimoAplicado: Centavos | null;
+  /** = `confirmadaEm` da venda. */
+  criadoEm: Date;
+  liberadoEm: Date;
+  /** Resgate não desfeito que usou o carimbo (RF6); nunca junto com `retiradoEm`. */
+  resgateId: string | null;
+  /** Venda cancelada (RF5). */
+  retiradoEm: Date | null;
+};
+
+export type Resgate = {
+  id: string;
+  empresaId: string;
+  clienteId: string;
+  /** Meta e prêmio da época (RF6). */
+  meta: number;
+  premio: string;
+  criadoEm: Date;
+  desfeitoEm: Date | null;
+};
+
+/** Link do cartão (RF8): a chave é única no sistema todo e pode ser trocada. */
+export type CartaoFidelidade = {
+  empresaId: string;
+  clienteId: string;
+  chave: string;
+  criadoEm: Date;
+  chaveTrocadaEm: Date | null;
+};
+
 /** Tudo o que o banco guarda; cada empresa só enxerga as próprias linhas. */
 export type Banco = {
   empresas: Empresa[];
@@ -64,6 +114,10 @@ export type Banco = {
   clientes: Cliente[];
   codigos: Codigo[];
   vendas: Venda[];
+  programas: Programa[];
+  carimbos: Carimbo[];
+  resgates: Resgate[];
+  cartoes: CartaoFidelidade[];
 };
 
 // ---- Leituras (fazem o papel das views da T11) ----
@@ -146,7 +200,62 @@ export interface RepositorioIndicacao {
     dados: { clienteId: string; codigoId: string | null; calculo: CalculoVenda },
     agora: Date,
   ): Promise<Venda>;
-  /** Marca como confirmada e, se `vincularA`, cria o vínculo do cliente (RN6). */
-  confirmarVenda(id: string, vincularA: string | null, agora: Date): Promise<void>;
+  /**
+   * Marca como confirmada e, se `vincularA`, cria o vínculo do cliente (RN6). Com `carimbo`,
+   * grava o carimbo da venda e, se o cliente ainda não tem cartão, cria com `chave` (spec 002, RF3, RF8).
+   */
+  confirmarVenda(
+    id: string,
+    vincularA: string | null,
+    agora: Date,
+    carimbo?: { valorMinimoAplicado: Centavos | null; liberadoEm: Date; chave: string } | null,
+  ): Promise<void>;
+  /** Cancela e retira o carimbo da venda, se houver; lança erro se ele estiver num resgate (spec 002, RF5). */
   cancelarVenda(id: string, agora: Date): Promise<void>;
+}
+
+/** Carimbo com a venda que o gerou, para o histórico do cartão (spec 10.2). */
+export type CarimboComVenda = Carimbo & { venda: { valorFinal: Centavos; canceladaEm: Date | null } };
+
+/** Cliente que tem cartão (pelo menos 1 carimbo ou 1 resgate), com tudo o que o cartão precisa. */
+export type CartaoDoCliente = {
+  cliente: { id: string; nome: string; telefone: Telefone };
+  chave: string;
+  carimbos: CarimboComVenda[];
+  resgates: Resgate[];
+};
+
+/**
+ * Leitura da página do cliente, sem login (faz o papel da RPC `cartao_publico`): só o que a RF9
+ * deixa mostrar. Sem telefone, valores, códigos ou indicador.
+ */
+export type CartaoPublicoDados = {
+  empresaNome: string;
+  clienteNome: string;
+  programa: Pick<Programa, "meta" | "premio" | "valorMinimo">;
+  carimbos: Pick<Carimbo, "id" | "criadoEm" | "liberadoEm" | "resgateId" | "retiradoEm">[];
+  resgates: Pick<Resgate, "id" | "criadoEm" | "desfeitoEm">[];
+};
+
+/** Fidelidade de **uma** empresa (a da sessão), como a `RepositorioIndicacao` (RE3). */
+export interface RepositorioFidelidade {
+  programa(): Promise<Programa | null>;
+  /** Clientes com cartão. */
+  listarCartoes(): Promise<CartaoDoCliente[]>;
+  /** `null` se o cliente não é da empresa ou ainda não tem cartão. */
+  cartaoCliente(clienteId: string): Promise<CartaoDoCliente | null>;
+  carimboDaVenda(vendaId: string): Promise<Carimbo | null>;
+
+  salvarPrograma(
+    dados: Pick<Programa, "meta" | "premio" | "valorMinimo" | "diasLiberacao">,
+    agora: Date,
+  ): Promise<Programa>;
+  /** Liga os carimbos ao resgate na mesma gravação; lança erro se algum não estiver livre no cartão. */
+  inserirResgate(
+    dados: { clienteId: string; meta: number; premio: string; carimboIds: string[] },
+    agora: Date,
+  ): Promise<Resgate>;
+  /** Marca como desfeito e solta os carimbos (RF7). */
+  desfazerResgate(id: string, agora: Date): Promise<void>;
+  trocarChave(clienteId: string, chave: string, agora: Date): Promise<void>;
 }

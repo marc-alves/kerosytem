@@ -4,7 +4,7 @@ import type { Centavos, PontosBase, StatusVenda } from "@/lib/indicacao/tipos";
 
 // Dados fictícios de desenvolvimento (T13). Telefones inventados, no formato (61) 90000-00NN.
 /** Mude ao mudar a semente ou o formato das linhas (lib/dados/sessao.ts troca o banco em memória). */
-export const VERSAO_SEMENTE = 2;
+export const VERSAO_SEMENTE = 3;
 
 export const EMPRESA_A = "empresa-lanchonete-da-maria";
 export const EMPRESA_B = "empresa-pastelaria-do-ze";
@@ -74,5 +74,9 @@ export function criarSemente(agora: Date): Banco {
       venda("a-ven-5", EMPRESA_A, "a-cli-joao", camila5, 11000, "pendente", 2 * HORA),
       venda("b-ven-1", EMPRESA_B, "b-cli-joao", { id: "b-cod-camila5", descontoBp: 1000 }, 3000, "pendente", 1 * HORA),
     ],
+    programas: [],
+    carimbos: [],
+    resgates: [],
+    cartoes: [],
   };
 }
