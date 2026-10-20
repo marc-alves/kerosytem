@@ -38,7 +38,7 @@ Ordem sugerida. Prefixo **F** para não confundir com as `E` da 000 e as `T` da 
 - [x] F24. Ajustes nas telas de venda (**spec 10.3**): frase de carimbo e **Copiar mensagem do cartão** depois de confirmar recebimento; aviso de carimbo no diálogo de cancelar; recusa de cancelar venda já usada em resgate com o link **Abrir cartão de João** (depende de F13, F14, F16, F21)
 
 ## Fase 5 — Tela do cliente
-- [ ] F25. Página **Meu cartão** em `/cartao/[chave]` (**spec 11.1**), fora do grupo `(app)`: sem login, cabeçalho nem navegação; `/cartao/` liberado no `proxy.ts`; não indexada; sem cache; completo liberado e a liberar; link inválido, trocado ou de módulo desligado com a mesma mensagem; nada de telefone, valor, código ou indicador (RF9); checklist (depende de F16, F18)
+- [x] F25. Página **Meu cartão** em `/cartao/[chave]` (**spec 11.1**), fora do grupo `(app)`: sem login, cabeçalho nem navegação; `/cartao/` liberado no `proxy.ts`; não indexada; sem cache; completo liberado e a liberar; link inválido, trocado ou de módulo desligado com a mesma mensagem; nada de telefone, valor, código ou indicador (RF9); checklist (depende de F16, F18)
 - [ ] F26. Cenários da fidelidade na página `/teste` (sem programa, cartão no meio, completo a liberar, completo liberado, com sobra, venda bloqueada por resgate, só Fidelidade sem Indicação, link do cliente) (depende de F19 a F25)
 
 ## Fase 6 — Supabase

@@ -15,7 +15,16 @@ const estilo: Record<Espaco, string> = {
  * Os M espaços do cartão, preenchidos até os carimbos exibidos (spec 002, 10.2, 10.4, 11.1).
  * `mostrarALiberar = false` na página do cliente, que não fala em prazo.
  */
-export function CartaoCarimbos({ estado, mostrarALiberar = true }: { estado: EstadoCartao; mostrarALiberar?: boolean }) {
+export function CartaoCarimbos({
+  estado,
+  mostrarALiberar = true,
+  legenda = `${estado.exibido} de ${estado.meta} carimbos`,
+}: {
+  estado: EstadoCartao;
+  mostrarALiberar?: boolean;
+  /** Página do cliente: "Você tem N de M carimbos". */
+  legenda?: string;
+}) {
   const liberados = mostrarALiberar ? liberadosExibidos(estado) : estado.exibido;
   const espacos: Espaco[] = Array.from({ length: estado.meta }, (_, i) =>
     i < liberados ? "liberado" : i < estado.exibido ? "a_liberar" : "vazio",
@@ -37,9 +46,7 @@ export function CartaoCarimbos({ estado, mostrarALiberar = true }: { estado: Est
           </li>
         ))}
       </ul>
-      <p className="text-botao font-semibold">
-        {estado.exibido} de {estado.meta} carimbos
-      </p>
+      <p className="text-botao font-semibold">{legenda}</p>
     </div>
   );
 }
