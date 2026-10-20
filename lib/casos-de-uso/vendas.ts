@@ -1,5 +1,8 @@
 import { recusa, temErros, type Recusa } from "@/lib/casos-de-uso/resultado";
-import type { RepositorioIndicacao } from "@/lib/dados/tipos";
+import type { RepositorioFidelidade, RepositorioIndicacao } from "@/lib/dados/tipos";
+import { dataLiberacao, ganhaCarimbo } from "@/lib/fidelidade/carimbo";
+import { estadoCartao, podeCancelarPorFidelidade } from "@/lib/fidelidade/cartao";
+import { escolherMensagem } from "@/lib/fidelidade/mensagem";
 import { lerReais } from "@/lib/formato/leitura";
 import { normalizarCodigo, validarCodigo } from "@/lib/indicacao/codigo";
 import { podeCancelarVenda, podeConfirmar } from "@/lib/indicacao/status";
@@ -111,35 +114,98 @@ export async function lancarVenda(
 
 const VENDA_NAO_ENCONTRADA = "Venda não encontrada.";
 
+/** Fidelidade na confirmação (spec 002): só é passada com o módulo ativo na empresa. */
+export type FidelidadeNaVenda = {
+  repo: RepositorioFidelidade;
+  empresaNome: string;
+  /** Endereço completo do cartão (RF8). */
+  link: (chave: string) => string;
+  gerarChave: () => string;
+};
+
+/** Frase de sucesso da confirmação com carimbo (spec 002, 10.3). */
+export type CarimboGanho = {
+  clienteId: string;
+  nome: string;
+  exibido: number;
+  meta: number;
+  completo: boolean;
+  /** Mensagem da seção 8 da spec 002, para o botão "Copiar mensagem do cartão". */
+  mensagem: string;
+};
+
 /**
  * RN10: revalida o vínculo (RN6) e a primeira compra (RN5) com o estado de agora;
  * na primeira venda confirmada com código, liga o cliente ao indicador.
+ * Com a fidelidade, dá o carimbo na mesma gravação (spec 002, RF3, RF4).
  */
 export async function confirmarRecebimento(
   repo: RepositorioIndicacao,
   vendaId: string,
   agora: Date,
-): Promise<{ ok: true } | Recusa<never>> {
+  fidelidade: FidelidadeNaVenda | null = null,
+): Promise<{ ok: true; carimbo: CarimboGanho | null } | Recusa<never>> {
   const venda = await repo.venda(vendaId);
   if (!venda) return recusa({ geral: VENDA_NAO_ENCONTRADA });
   const { paraValidar } = await repo.buscarCliente(venda.cliente.telefone);
   const resultado = podeConfirmar({ venda, cliente: paraValidar });
   if (!resultado.ok) return recusa({ geral: resultado.mensagem });
   const vincularA = resultado.criarVinculo && venda.codigo ? venda.codigo.indicadorId : null;
-  await repo.confirmarVenda(vendaId, vincularA, agora);
-  return { ok: true };
+
+  const programa = fidelidade && (await fidelidade.repo.programa());
+  const daCarimbo = programa && ganhaCarimbo({ venda: { ...venda, status: "confirmada" }, programa });
+  const carimbo = daCarimbo
+    ? {
+        valorMinimoAplicado: programa.valorMinimo,
+        liberadoEm: dataLiberacao({ confirmadaEm: agora, diasLiberacao: programa.diasLiberacao }),
+        chave: fidelidade!.gerarChave(),
+      }
+    : null;
+  await repo.confirmarVenda(vendaId, vincularA, agora, carimbo);
+  if (!daCarimbo) return { ok: true, carimbo: null };
+
+  const cartao = (await fidelidade!.repo.cartaoCliente(venda.cliente.id))!;
+  const estado = estadoCartao({ carimbos: cartao.carimbos, meta: programa.meta, agora });
+  return {
+    ok: true,
+    carimbo: {
+      clienteId: venda.cliente.id,
+      nome: venda.cliente.nome,
+      exibido: estado.exibido,
+      meta: estado.meta,
+      completo: estado.completo,
+      mensagem: escolherMensagem({
+        nome: venda.cliente.nome,
+        empresa: fidelidade!.empresaNome,
+        link: fidelidade!.link(cartao.chave),
+        premio: programa.premio,
+        estado,
+        momento: "carimbo",
+      }),
+    },
+  };
 }
 
-/** RN12: pendente ou paga, cancelar é livre; o vínculo do cliente não é desfeito (RN6). */
+/**
+ * RN12: pendente ou paga, cancelar é livre; o vínculo do cliente não é desfeito (RN6).
+ * Exceção (spec 002, RF5): venda já usada num resgate é recusada, com o cliente para o link
+ * "Abrir cartão". Vale mesmo com a fidelidade desligada, para o cartão não ficar errado se ela voltar.
+ */
 export async function cancelarVenda(
   repo: RepositorioIndicacao,
   vendaId: string,
   agora: Date,
-): Promise<{ ok: true } | Recusa<never>> {
+  fidelidade: RepositorioFidelidade | null = null,
+): Promise<{ ok: true } | (Recusa<never> & { cartaoClienteId?: string })> {
   const venda = await repo.venda(vendaId);
   if (!venda) return recusa({ geral: VENDA_NAO_ENCONTRADA });
   const resultado = podeCancelarVenda(venda);
   if (!resultado.ok) return recusa({ geral: resultado.mensagem });
+  if (fidelidade) {
+    const carimbo = await fidelidade.carimboDaVenda(vendaId);
+    const porFidelidade = podeCancelarPorFidelidade({ carimbo, nomeCliente: venda.cliente.nome });
+    if (!porFidelidade.ok) return { ...recusa({ geral: porFidelidade.mensagem }), cartaoClienteId: venda.cliente.id };
+  }
   await repo.cancelarVenda(vendaId, agora);
   return { ok: true };
 }

@@ -187,7 +187,7 @@ describe("confirmarRecebimento e cancelarVenda (spec 10.8, seção 11)", () => {
   it("confirmar conta o uso, entra no resumo e cria o vínculo na primeira vez", async () => {
     const id = await lancar({ ...novo, codigo: "camila5", valor: "110" });
     const [usos, resumo] = [await usosCamila5(), await camila()];
-    expect(await confirmarRecebimento(a, id, agora)).toEqual({ ok: true });
+    expect(await confirmarRecebimento(a, id, agora)).toEqual({ ok: true, carimbo: null });
     expect(await a.venda(id)).toMatchObject({ status: "confirmada", confirmadaEm: agora });
     expect(await usosCamila5()).toBe(usos + 1);
     expect(await camila()).toMatchObject({
@@ -220,7 +220,7 @@ describe("confirmarRecebimento e cancelarVenda (spec 10.8, seção 11)", () => {
   it("segunda primeira compra na confirmação: recusada (RN5)", async () => {
     const primeira = await lancar({ ...novo, codigo: "primeiraamanda" });
     const segunda = await lancar({ ...novo, codigo: "primeiraamanda" });
-    expect(await confirmarRecebimento(a, primeira, agora)).toEqual({ ok: true });
+    expect(await confirmarRecebimento(a, primeira, agora)).toEqual({ ok: true, carimbo: null });
     const r = await confirmarRecebimento(a, segunda, agora);
     expect(r.ok ? null : r.erros.geral).toMatch(/já tem uma compra paga, então o código primeiraamanda não vale mais/);
   });
